@@ -316,8 +316,10 @@ class Eloquent {
                 return true;
             }
         } else{
-            $this->builder->where('Id',$this->{static::$primaryKey});
-            $this->builder->update($data);
+            $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
+            if($this->builder->update($data)){
+                return true;
+            }
         }
         return false;
     }
@@ -381,7 +383,7 @@ class Eloquent {
             throw EloquentException::forNoPrimaryKey(get_class($this));
         }
 
-        if(!empty(static::$primaryKey)){
+        if(!empty($this->{static::$primaryKey})){
           
 
             if (isset($params['where'])) {
