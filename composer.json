@@ -1,0 +1,17 @@
+{
+    "name": "andikaryanto11/ciorm",
+    "description": "ORM Database mapping for Codeigniter 4",
+    "keywords": ["codeigniter4", "codeigniter", "Eloquent", "ORM","Database"],
+    "homepage": "https://packagist.org/packages/andikaryanto11/ciorm",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "AndikAryanto11\\": "src/"
+        }
+    }
+    
+}
