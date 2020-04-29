@@ -331,7 +331,7 @@ class Eloquent {
      */
     public function hasOne(string $relatedEloquent, string $foreignKey){
         if (!empty($this->$foreignKey)) {
-            $result = $relatedEloquent::get($this->$foreignKey);
+            $result = $relatedEloquent::find($this->$foreignKey);
             return $result;
         } 
         
