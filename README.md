@@ -4,7 +4,7 @@ This package is created to map your database to entity / Class you make
 # Rules
   Create class then Extends to this Eloquent
   - protected $table = "your_table_name" is mandatory property you have to set
-  - protected $primaryKey = "your_primary_key_field_name" is mandatory property you have to set
+  - static $primaryKey = "your_primary_key_field_name" is mandatory property you have to set
 
 # Method
   - find($id)

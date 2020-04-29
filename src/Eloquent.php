@@ -38,7 +38,7 @@ class Eloquent {
     /**
      * Primary Key Field;
      */
-    private $primary;
+    static $primaryKey;
 
     
     public function __construct()
@@ -48,7 +48,6 @@ class Eloquent {
         }
 
         $this->db = \Config\Database::connect();
-        self::$primary = $this->primaryKey;
         $this->builder = $this->db->table($this->table);
         $this->fields = $this->db->getFieldNames($this->table);
     }
@@ -77,7 +76,7 @@ class Eloquent {
     public static function find($id){
         $where = [
             'where' => [
-                self::$primary => $id
+                static::$primaryKey => $id
             ]
         ];
         $data = static::findAll($where);
@@ -99,7 +98,7 @@ class Eloquent {
        
         $where = [
             'where' => [
-                self::$primary => $id
+                static::$primaryKey => $id
             ]
         ];
         $data = static::findAll($where);
@@ -118,7 +117,7 @@ class Eloquent {
     public static function findOrFail($id){
         $where = [
             'where' => [
-                self::$primary => $id
+                static::$primaryKey => $id
             ]
         ];
         $data = static::findAll($where);
