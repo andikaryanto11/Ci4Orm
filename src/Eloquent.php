@@ -310,13 +310,13 @@ class Eloquent {
         foreach($this->fields as $field){
             $data[$field] = $this->$field;
         }
-        if(empty($this->Id) || is_null($this->Id)){
+        if(empty($this->{static::$primaryKey}) || is_null($this->{static::$primaryKey})){
             if($this->builder->set($data, true)->insert()){
-                $this->Id = $this->db->insertID();
+                $this->{static::$primaryKey} = $this->db->insertID();
                 return true;
             }
         } else{
-            $this->builder->where('Id',$this->Id);
+            $this->builder->where('Id',$this->{static::$primaryKey});
             $this->builder->update($data);
         }
         return false;
@@ -381,14 +381,14 @@ class Eloquent {
             throw EloquentException::forNoPrimaryKey(get_class($this));
         }
 
-        if(!empty($this->primaryKey)){
+        if(!empty(static::$primaryKey)){
           
 
             if (isset($params['where'])) {
-                $params['where'][$foreignKey] = $this->{$this->primaryKey};
+                $params['where'][$foreignKey] = $this->{static::$primaryKey};
             } else {
                 $params['where'] = [
-                    $foreignKey => $this->{$this->primaryKey}
+                    $foreignKey => $this->{static::$primaryKey}
                 ];
             }
             $result = $relatedEloquent::findAll($params);
