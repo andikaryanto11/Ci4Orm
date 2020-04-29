@@ -6,6 +6,22 @@ This package is created to map your database to entity / Class you make
   - protected $table = "your_table_name" is mandatory property you have to set
   - static $primaryKey = "your_primary_key_field_name" is mandatory property you have to set
 
+        
+        use AndikAryanto11\Eloquent;
+        class MyEloquent extends Eloquent{
+
+          public $FieldInTable;
+          public $AnotherFieldInTable;
+
+          protected $table = "MyTable";
+          static $primaryKey = "MyPKfield";
+
+          public function __construct()
+          {
+              parent::__construct();
+          }
+        }
+
 # Method
   - find($id)
   
