@@ -68,6 +68,18 @@ class Eloquent {
     }
 
     /**
+     * @param array $filter
+     * @return int
+     * 
+     * Count All data
+     */
+    public static function count(array $filter){
+        
+        $data = static::findAll($filter);
+        return count($data);
+    }
+
+    /**
      * @param int $id
      * @return App\Eloquents|null
      * 
