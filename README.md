@@ -21,10 +21,10 @@ This package is created to map your database to entity / Class you make
               parent::__construct();
           }
         }
-        
+
 # Install
   
-    composer require andikaryanto11/ci4orm
+    composer require andikaryanto11/ci4orm:dev-master
 
 
 # Method
