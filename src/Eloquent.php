@@ -41,13 +41,17 @@ class Eloquent {
     static $primaryKey;
 
     
-    public function __construct()
+    /**
+     * @param $db is \Config\Database::connect();
+     * 
+     */
+    public function __construct(&$db)
     {
         if(!property_exists(get_class($this), 'table')){
             throw EloquentException::forNoTableName(get_class($this));
         }
 
-        $this->db = \Config\Database::connect();
+        $this->db = $db;
         $this->builder = $this->db->table($this->table);
         $this->fields = $this->db->getFieldNames($this->table);
     }
