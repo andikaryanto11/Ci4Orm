@@ -21,7 +21,7 @@ class Eloquent {
 	 *
 	 * @var ConnectionInterface
 	 */
-    protected $db;
+    protected static $db;
 
     /**
      * Database Builder
@@ -51,9 +51,13 @@ class Eloquent {
             throw EloquentException::forNoTableName(get_class($this));
         }
 
-        $this->db = $db;
-        $this->builder = $this->db->table($this->table);
-        $this->fields = $this->db->getFieldNames($this->table);
+        self::$db = $db;
+        $this->builder = self::$db->table($this->getTableName());
+        $this->fields = self::$db->getFieldNames($this->getTableName());
+    }
+
+    public function getTableName(){
+        return $this->table;
     }
      
     /**
@@ -63,8 +67,11 @@ class Eloquent {
      * check if data exist
      */
     public function isDataExist(array $filter){
+        $params = [
+            "where" => $filter
+        ];
         
-        $data = static::findAll($filter);
+        $data = static::findAll($params);
         if(count($data) > 0){
             return true;
         }
@@ -119,7 +126,7 @@ class Eloquent {
         ];
         $data = static::findAll($where);
         if(empty($data))
-            return new static;
+            return new static(self::$db);
         return $data[0];
     }
     
@@ -166,7 +173,7 @@ class Eloquent {
        
         $data = static::findAll($filter);
         if(empty($data))
-            return new static;
+            return new static(self::$db);
         return $data[0];
     }
 
@@ -192,12 +199,12 @@ class Eloquent {
      * get all data result from table
      */
     public static function findAll(array $filter = null){
-        $entity = new static;
+        $entity = new static(self::$db);
         $result = $entity->fetch($filter);
         if(count($result) > 0 ){
             return $result;
         }
-        return null;
+        return [];
     }
 
     /**
@@ -207,7 +214,7 @@ class Eloquent {
      * get all data result from table or throw error
      */
     public static function findAllOrFail(array $filter = null){
-        $entity = new static;
+        $entity = new static(self::$db);
         $result = $entity->fetch($filter);
         if(count($result > 0)){
             return $result;
@@ -237,15 +244,17 @@ class Eloquent {
         $limit = (isset($filter['limit']) ? $filter['limit'] : FALSE);
         $group = (isset($filter['group']) ? $filter['group'] : FALSE);
 
-        if ($join)
-            foreach($join as $key => $v){
-                $type="";
-                if(isset($v['type'])){
-                    $type = $v['type'];
+        if ($join){
+            foreach($join as $key => $vv){
+                foreach($vv as $v){
+                    $type="";
+                    if(isset($v['type'])){
+                        $type = $v['type'];
+                    }
+                    $this->builder->join($key, $v['key'],$type);
                 }
-                $this->builder->join($key, $v['key'],$type);
             }
-
+        }
         if ($where)
             $this->builder->where($where);
 
@@ -254,19 +263,22 @@ class Eloquent {
 
         if ($wherein){
             foreach($wherein as $key => $v){
-                $this->builder->whereIn($key, $v);
+                if(!empty($v))
+                    $this->builder->whereIn($key, $v);
             }
         }
 
         if ($orwherein){
             foreach($orwherein as $key => $v){
-                $this->builder->orWhereIn($key, $v);
+                if(!empty($v))
+                    $this->builder->orWhereIn($key, $v);
             }
         }
         
         if ($wherenotin){
             foreach($wherenotin as $key => $v){
-                $this->builder->whereNotIn($key, $v);
+                if(!empty($v))
+                    $this->builder->whereNotIn($key, $v);
             }
         }
 
@@ -279,25 +291,29 @@ class Eloquent {
         
         if ($orlike){
             foreach($orlike as $key => $v){
-                $this->builder->orLike($key, $v);
+                if(!empty($v))
+                    $this->builder->orLike($key, $v);
             }
         }
 
         if ($notlike){
             foreach($notlike as $key => $v){
-                $this->builder->notLike($key, $v);
+                if(!empty($v))
+                    $this->builder->notLike($key, $v);
             }
         }
 
         if ($ornotlike){
             foreach($ornotlike as $key => $v){
-                $this->builder->orNotLike($key, $v);
+                if(!empty($v))
+                    $this->builder->orNotLike($key, $v);
             }
         }
 
         if ($order){
             foreach($order as $key => $v){
-                $this->builder->orderBy($key, $v);
+                if(!empty($v))
+                    $this->builder->orderBy($key, $v);
             }
         }
 
@@ -328,7 +344,7 @@ class Eloquent {
         }
         if(empty($this->{static::$primaryKey}) || is_null($this->{static::$primaryKey})){
             if($this->builder->set($data, true)->insert()){
-                $this->{static::$primaryKey} = $this->db->insertID();
+                $this->{static::$primaryKey} =static::$db->insertID();
                 return true;
             }
         } else{
@@ -338,6 +354,13 @@ class Eloquent {
             }
         }
         return false;
+    }
+
+    public function delete(){
+        $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
+        if(!$this->builder->delete())
+            return false;
+        return true;
     }
 
     /**
