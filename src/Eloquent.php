@@ -339,6 +339,7 @@ class Eloquent {
 
     public function save(){
         $data = [];
+        $this->beforeSave();
         foreach($this->fields as $field){
             $data[$field] = $this->$field;
         }
