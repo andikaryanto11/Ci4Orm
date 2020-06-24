@@ -155,7 +155,7 @@ class Eloquent {
      * 
      * get first data of result from table   
      */
-    public static function findOne(array $filter = null){
+    public static function findOne(array $filter = []){
        
         $data = static::findAll($filter);
         if(empty($data))
@@ -169,7 +169,7 @@ class Eloquent {
      * 
      * get first data of result from table   
      */
-    public static function findOneOrNew(array $filter = null){
+    public static function findOneOrNew(array $filter = []){
        
         $data = static::findAll($filter);
         if(empty($data))
@@ -184,7 +184,7 @@ class Eloquent {
      * get first data of result from table or throw error  
      * 
      */
-    public static function findOneOrFail(array $filter = null){
+    public static function findOneOrFail(array $filter = []){
        
         $data = static::findAll($filter);
         if(empty($data))
@@ -198,7 +198,7 @@ class Eloquent {
      * 
      * get all data result from table
      */
-    public static function findAll(array $filter = null){
+    public static function findAll(array $filter = []){
         $entity = new static(self::$db);
         $result = $entity->fetch($filter);
         if(count($result) > 0 ){
@@ -213,7 +213,7 @@ class Eloquent {
      * 
      * get all data result from table or throw error
      */
-    public static function findAllOrFail(array $filter = null){
+    public static function findAllOrFail(array $filter = []){
         $entity = new static(self::$db);
         $result = $entity->fetch($filter);
         if(count($result > 0)){
