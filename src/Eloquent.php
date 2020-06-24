@@ -228,98 +228,112 @@ class Eloquent {
      * 
      * get all data result from table
      */
-    public function fetch(array $filter = null){
+    public function fetch(array $filter = []){
 
-        $join = (isset($filter['join']) ? $filter['join'] : FALSE);
-        $where = (isset($filter['where']) ? $filter['where'] : FALSE);
-        $wherein = (isset($filter['whereIn']) ? $filter['whereIn'] : FALSE);
-        $orwherein = (isset($filter['orWhereIn']) ? $filter['orWhereIn'] : FALSE);
-        $orwhere = (isset($filter['orWhere']) ? $filter['orWhere'] : FALSE);
-        $wherenotin = (isset($filter['whereNotIn']) ? $filter['whereNotIn'] : FALSE);
-        $like = (isset($filter['like']) ? $filter['like'] : FALSE);
-        $orlike = (isset($filter['orLike']) ? $filter['orLike'] : FALSE);
-        $notlike = (isset($filter['notLike']) ? $filter['notLike'] : FALSE);
-        $ornotlike = (isset($filter['orNotLike']) ? $filter['orNotLike'] : FALSE);
-        $order = (isset($filter['order']) ? $filter['order'] : FALSE);
-        $limit = (isset($filter['limit']) ? $filter['limit'] : FALSE);
-        $group = (isset($filter['group']) ? $filter['group'] : FALSE);
+        if(!empty($filter)){
+            $join = (isset($filter['join']) ? $filter['join'] : FALSE);
+            $where = (isset($filter['where']) ? $filter['where'] : FALSE);
+            $wherein = (isset($filter['whereIn']) ? $filter['whereIn'] : FALSE);
+            $orwherein = (isset($filter['orWhereIn']) ? $filter['orWhereIn'] : FALSE);
+            $orwhere = (isset($filter['orWhere']) ? $filter['orWhere'] : FALSE);
+            $wherenotin = (isset($filter['whereNotIn']) ? $filter['whereNotIn'] : FALSE);
+            $like = (isset($filter['like']) ? $filter['like'] : FALSE);
+            $orlike = (isset($filter['orLike']) ? $filter['orLike'] : FALSE);
+            $notlike = (isset($filter['notLike']) ? $filter['notLike'] : FALSE);
+            $ornotlike = (isset($filter['orNotLike']) ? $filter['orNotLike'] : FALSE);
+            $order = (isset($filter['order']) ? $filter['order'] : FALSE);
+            $limit = (isset($filter['limit']) ? $filter['limit'] : FALSE);
+            $group = (isset($filter['group']) ? $filter['group'] : FALSE);
 
-        if ($join){
-            foreach($join as $key => $vv){
-                foreach($vv as $v){
-                    $type="";
-                    if(isset($v['type'])){
-                        $type = $v['type'];
+            if ($join){
+                foreach($join as $key => $vv){
+                    foreach($vv as $v){
+                        $type="";
+                        if(isset($v['type'])){
+                            $type = $v['type'];
+                        }
+                        $this->builder->join($key, $v['key'],$type);
                     }
-                    $this->builder->join($key, $v['key'],$type);
                 }
             }
-        }
-        if ($where)
-            $this->builder->where($where);
+            if ($where)
+                $this->builder->where($where);
 
-        if ($orwhere)
-            $this->builder->orWhere($orwhere);
+            if ($orwhere)
+                $this->builder->orWhere($orwhere);
 
-        if ($wherein){
-            foreach($wherein as $key => $v){
-                if(!empty($v))
-                    $this->builder->whereIn($key, $v);
+            if ($wherein){
+                foreach($wherein as $key => $v){
+                    if(!empty($v))
+                        $this->builder->whereIn($key, $v);
+                }
             }
-        }
 
-        if ($orwherein){
-            foreach($orwherein as $key => $v){
-                if(!empty($v))
-                    $this->builder->orWhereIn($key, $v);
+            if ($orwherein){
+                foreach($orwherein as $key => $v){
+                    if(!empty($v))
+                        $this->builder->orWhereIn($key, $v);
+                }
             }
+            
+            if ($wherenotin){
+                foreach($wherenotin as $key => $v){
+                    if(!empty($v))
+                        $this->builder->whereNotIn($key, $v);
+                }
+            }
+
+
+            if ($like)
+                $this->builder->like($like);
+
+            if ($orlike)
+                $this->builder->orLike($orlike);
+            
+            if ($orlike){
+                foreach($orlike as $key => $v){
+                    if(!empty($v))
+                        $this->builder->orLike($key, $v);
+                }
+            }
+
+            if ($notlike){
+                foreach($notlike as $key => $v){
+                    if(!empty($v))
+                        $this->builder->notLike($key, $v);
+                }
+            }
+
+            if ($ornotlike){
+                foreach($ornotlike as $key => $v){
+                    if(!empty($v))
+                        $this->builder->orNotLike($key, $v);
+                }
+            }
+
+            if($group){
+                $this->builder->groupStart();
+                foreach($group as $key => $v){
+                    if($key == 'orLike'){
+                        foreach($v as $orLikeKey => $orLikeValue){
+                            $this->builder->orLike($orLikeKey, $orLikeValue);
+                        }
+                    }
+                }
+                $this->builder->groupEnd();
+            }
+
+            if ($order){
+                foreach($order as $key => $v){
+                    if(!empty($v))
+                        $this->builder->orderBy($key, $v);
+                }
+            }
+
+            if ($limit)
+                $this->builder->limit($limit['size'], ($limit['page'] - 1) *  $limit['size']);
         }
         
-        if ($wherenotin){
-            foreach($wherenotin as $key => $v){
-                if(!empty($v))
-                    $this->builder->whereNotIn($key, $v);
-            }
-        }
-
-
-        if ($like)
-            $this->builder->like($like);
-
-        if ($orlike)
-            $this->builder->orLike($orlike);
-        
-        if ($orlike){
-            foreach($orlike as $key => $v){
-                if(!empty($v))
-                    $this->builder->orLike($key, $v);
-            }
-        }
-
-        if ($notlike){
-            foreach($notlike as $key => $v){
-                if(!empty($v))
-                    $this->builder->notLike($key, $v);
-            }
-        }
-
-        if ($ornotlike){
-            foreach($ornotlike as $key => $v){
-                if(!empty($v))
-                    $this->builder->orNotLike($key, $v);
-            }
-        }
-
-        if ($order){
-            foreach($order as $key => $v){
-                if(!empty($v))
-                    $this->builder->orderBy($key, $v);
-            }
-        }
-
-        if ($limit)
-            $this->builder->limit($limit['size'], ($limit['page'] - 1) *  $limit['size']);
-
         $result = $this->builder->get()->getResult(get_class($this));
 
         return $result;
