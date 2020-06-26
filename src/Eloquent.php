@@ -84,9 +84,9 @@ class Eloquent {
      * 
      * Count All data
      */
-    public static function count(array $filter){
+    public static function count(array $filter, $returnEntity = true){
         
-        $data = static::findAll($filter);
+        $data = static::findAll($filter, $returnEntity);
         return count($data);
     }
 
@@ -198,9 +198,9 @@ class Eloquent {
      * 
      * get all data result from table
      */
-    public static function findAll(array $filter = []){
+    public static function findAll(array $filter = [], $returnEntity = true, $columns = []){
         $entity = new static(self::$db);
-        $result = $entity->fetch($filter);
+        $result = $entity->fetch($filter, $returnEntity,  $columns);
         if(count($result) > 0 ){
             return $result;
         }
@@ -228,7 +228,7 @@ class Eloquent {
      * 
      * get all data result from table
      */
-    public function fetch(array $filter = []){
+    public function fetch(array $filter = [], $returnEntity = true, $columns = []){
 
         if(!empty($filter)){
             $join = (isset($filter['join']) ? $filter['join'] : FALSE);
@@ -333,9 +333,17 @@ class Eloquent {
             if ($limit)
                 $this->builder->limit($limit['size'], ($limit['page'] - 1) *  $limit['size']);
         }
-        
-        $result = $this->builder->get()->getResult(get_class($this));
+        $result = null;
+        if($returnEntity)
+            $result = $this->builder->get()->getResult(get_class($this));
+        else {
+            $imploded = implode(",", $columns);
+            $result = $this->builder->select($imploded)->get()->getResult();
+        }
 
+        // $result = self::$db->getLastQuery();
+            
+        // echo json_encode($result);
         return $result;
         
     }
