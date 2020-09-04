@@ -213,10 +213,10 @@ class Eloquent {
      * 
      * get all data result from table or throw error
      */
-    public static function findAllOrFail(array $filter = []){
+    public static function findAllOrFail(array $filter = [], $returnEntity = true, $columns = []){
         $entity = new static(self::$db);
-        $result = $entity->fetch($filter);
-        if(count($result > 0)){
+        $result = $entity->fetch($filter, $returnEntity,  $columns);
+        if(count($result) > 0){
             return $result;
         }
         throw new DatabaseException("Cannot find any data");
