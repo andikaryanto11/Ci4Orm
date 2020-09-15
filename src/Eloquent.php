@@ -334,14 +334,17 @@ class Eloquent {
                 $this->builder->limit($limit['size'], ($limit['page'] - 1) *  $limit['size']);
         }
         $result = null;
-        if($returnEntity)
-            $result = $this->builder->get()->getResult(get_class($this));
-        else {
+        if($returnEntity){
+            $fields = self::$db->getFieldNames($this->table);
+
+            $imploded = implode(",".$this->table.".",$fields);
+            $result = $this->builder->select($this->table.".".$imploded)->get()->getResult(get_class($this));
+        } else {
             $imploded = implode(",", $columns);
             $result = $this->builder->select($imploded)->get()->getResult();
         }
 
-        // $result = self::$db->getLastQuery();
+        // $result[] = self::$db->getLastQuery()->getQuery();
             
         // echo json_encode($result);
         return $result;
