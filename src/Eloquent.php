@@ -396,12 +396,24 @@ class Eloquent {
      * 
      * Get parent related table data
      */
-    public function hasOne(string $relatedEloquent, string $foreignKey){
+    public function hasOne(string $relatedEloquent, string $foreignKey, $params = []){
         if (!empty($this->$foreignKey)) {
-            $result = $relatedEloquent::find($this->$foreignKey);
-            return $result;
-        } 
-        
+            if(empty($params)){
+                $result = $relatedEloquent::find($this->$foreignKey);
+                return $result;
+            } else {
+                if (isset($params['where'])) {
+                    $params['where'][$foreignKey] = $this->$foreignKey;
+                } else {
+                    $params['where'] = [
+                        $foreignKey => $this->$foreignKey
+                    ];
+                }
+                $result = $relatedEloquent::findOne($params);
+                return $result;
+            }
+        }
+
         return null;
     }
 
@@ -412,8 +424,8 @@ class Eloquent {
      * 
      * Get parent related table data
      */
-    public function hasOneOrNew(string $relatedEloquent, string $foreignKey){
-        $result = $this->hasOne($relatedEloquent, $foreignKey);
+    public function hasOneOrNew(string $relatedEloquent, string $foreignKey, $params = []){
+        $result = $this->hasOne($relatedEloquent, $foreignKey, $params);
         if(!is_null($result)){
             return $result;
         }
@@ -427,8 +439,8 @@ class Eloquent {
      * 
      * Get parent related table data
      */
-    public function hasOneOrFail(string $relatedEloquent, string $foreignKey){
-        $result = $this->hasOne($relatedEloquent, $foreignKey);
+    public function hasOneOrFail(string $relatedEloquent, string $foreignKey, $params = []){
+        $result = $this->hasOne($relatedEloquent, $foreignKey, $params);
         if(!is_null($result)){
             return $result;
         }
@@ -443,7 +455,7 @@ class Eloquent {
      * 
      * Get child related table data
      */
-    public function hasMany(string $relatedEloquent, string $foreignKey, $params = array()){
+    public function hasMany(string $relatedEloquent, string $foreignKey, $params = []){
         if(!property_exists(get_class($this), 'primaryKey')){
             throw EloquentException::forNoPrimaryKey(get_class($this));
         }
@@ -464,6 +476,73 @@ class Eloquent {
             }
         }
         return null;
+    }
+
+    /**
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of related Eloquent
+     * @param string $params param to filter data
+     * @return Eloquent array Object or null
+     * 
+     * Get child related table data
+     */
+    public function hasFirst(string $relatedEloquent, string $foreignKey, $params = [])
+    {
+        if (!property_exists(get_class($this), 'primaryKey')) {
+            throw EloquentException::forNoPrimaryKey(get_class($this));
+        }
+
+        if (!empty($this->{static::$primaryKey})) {
+
+
+            if (isset($params['where'])) {
+                $params['where'][$foreignKey] = $this->{static::$primaryKey};
+            } else {
+                $params['where'] = [
+                    $foreignKey => $this->{static::$primaryKey}
+                ];
+            }
+            $result = $relatedEloquent::findAll($params);
+            if (count($result) > 0) {
+                return $result[0];
+            }
+        }
+
+        
+        return null;
+    }
+
+
+    /**
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of related Eloquent
+     * @param string $params param to filter data
+     * @return Eloquent array Object or null
+     * 
+     * Get child related table data
+     */
+    public function hasFirstOrNew(string $relatedEloquent, string $foreignKey, $params = [])
+    {
+        if (!property_exists(get_class($this), 'primaryKey')) {
+            throw EloquentException::forNoPrimaryKey(get_class($this));
+        }
+
+        if (!empty($this->{static::$primaryKey})) {
+
+
+            if (isset($params['where'])) {
+                $params['where'][$foreignKey] = $this->{static::$primaryKey};
+            } else {
+                $params['where'] = [
+                    $foreignKey => $this->{static::$primaryKey}
+                ];
+            }
+            $result = $relatedEloquent::findAll($params);
+            if (count($result) > 0) {
+                return $result[0];
+            }
+        }
+        return new $relatedEloquent;
     }
 
     /**
