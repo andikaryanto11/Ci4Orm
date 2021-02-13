@@ -40,6 +40,10 @@ class Eloquent {
      */
     static $primaryKey;
 
+    /**
+     * filter params;
+     */
+    protected $filter;
     
     /**
      * @param $db is \Config\Database::connect();
@@ -194,12 +198,16 @@ class Eloquent {
 
     /**
      * @param array $filter
-     * @return array App\Eloquent
+     * @return mixed array App\Eloquent | this
      * 
      * get all data result from table
      */
-    public static function findAll(array $filter = [], $returnEntity = true, $columns = []){
+    public static function findAll(array $filter = [], $returnEntity = true, $columns = [], $chunked = false){
         $entity = new static(self::$db);
+        $entity->filter = $filter;
+        if($chunked)
+            return $entity;
+
         $result = $entity->fetch($filter, $returnEntity,  $columns);
         if(count($result) > 0 ){
             return $result;
@@ -220,6 +228,25 @@ class Eloquent {
             return $result;
         }
         throw new DatabaseException("Cannot find any data");
+    }
+
+     /**
+     * @param array $columnName
+     * @return array Of specific column data
+     * 
+     * get all column data 
+     */
+    public function chunk($columnName){
+        
+        $result = $this->fetch($this->filter);
+        if(count($result) > 0 ){
+            $chunkedData = [];
+            foreach($result as $res){
+                $chunkedData[] = $res->$columnName;
+            }
+            return $chunkedData;
+        }
+        return [];
     }
 
     /**
