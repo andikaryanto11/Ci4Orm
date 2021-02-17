@@ -408,6 +408,9 @@ class Eloquent {
 
     public function save(){
         $data = [];
+        if(!$this->isDirty())
+            return true;
+            
         $this->beforeSave();
         foreach($this->fields as $field){
             $data[$field] = $this->$field;
