@@ -63,6 +63,23 @@ class Eloquent {
     public function getTableName(){
         return $this->table;
     }
+
+    /**
+     * Check if intance has changed value from orginal daata
+     * 
+     * @return boolean
+     */
+    public function isDirty(){
+        $clonedData = static::find($this->{static::$primaryKey});
+        foreach($this as $key => $value){
+            if($value != $clonedData->$key)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
      
     /**
      * @param array $filter
