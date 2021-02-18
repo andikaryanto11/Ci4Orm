@@ -70,7 +70,10 @@ class Eloquent {
      * @return boolean
      */
     public function isDirty(){
-        $clonedData = static::find($this->{static::$primaryKey});
+        if(empty($this->{static::$primaryKey}))
+            return true;
+            
+        $clonedData = static::findOrNew($this->{static::$primaryKey});
         foreach($this as $key => $value){
             if($value != $clonedData->$key)
             {
