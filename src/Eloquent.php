@@ -49,6 +49,10 @@ class Eloquent {
      * @param $db is \Config\Database::connect();
      * 
      */
+
+    protected $nonEscapedField = [];
+
+    
     public function __construct(&$db)
     {
         if(!property_exists(get_class($this), 'table')){
@@ -416,7 +420,10 @@ class Eloquent {
             
         $this->beforeSave();
         foreach($this->fields as $field){
-            $data[$field] = $this->$field;
+            if(!in_array($field, $this->nonEscapedField))
+                $data[$field] = htmlspecialchars($this->$field);
+            else 
+                $data[$field] = $this->$field;
         }
         if(empty($this->{static::$primaryKey}) || is_null($this->{static::$primaryKey})){
             if($this->builder->set($data, true)->insert()){
