@@ -420,6 +420,11 @@ class Eloquent {
             
         $this->beforeSave();
         foreach($this->fields as $field){
+            if(is_null($this->$field)){
+                $data[$field] = null;
+                continue;
+            }
+            
             if(!in_array($field, $this->nonEscapedField))
                 $data[$field] = htmlspecialchars($this->$field);
             else 
