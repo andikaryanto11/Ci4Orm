@@ -1,8 +1,10 @@
 <?php
+
 namespace AndikAryanto11;
+
 use Andikaryanto11\Exception\DatabaseException;
 use Andikaryanto11\Exception\EloquentException;
-
+use stdClass;
 
 /**
  * Class Eloquent
@@ -14,13 +16,14 @@ use Andikaryanto11\Exception\EloquentException;
  * @package CodeIgniter
  * 
  */
-class Eloquent {
+class Eloquent
+{
 
     /**
-	 * Database Connection
-	 *
-	 * @var ConnectionInterface
-	 */
+     * Database Connection
+     *
+     * @var ConnectionInterface
+     */
     protected static $db;
 
     /**
@@ -44,18 +47,32 @@ class Eloquent {
      * filter params;
      */
     protected $filter;
-    
+
     /**
      * @param $db is \Config\Database::connect();
      * 
      */
 
+     /**
+      * Default data to output is escaped, set this field to non escape field
+      */
     protected $nonEscapedField = [];
 
-    
+    /**
+     * Data will be escaped if set to true
+     */
+    protected $escapeToOutput = true;
+
+    /**
+     * Hide field value for some field(s), data will be set to null 
+     * 
+     */
+    protected $hideFieldValue = [];
+
+
     public function __construct(&$db)
     {
-        if(!property_exists(get_class($this), 'table')){
+        if (!property_exists(get_class($this), 'table')) {
             throw EloquentException::forNoTableName(get_class($this));
         }
 
@@ -64,7 +81,8 @@ class Eloquent {
         $this->fields = self::$db->getFieldNames($this->getTableName());
     }
 
-    public function getTableName(){
+    public function getTableName()
+    {
         return $this->table;
     }
 
@@ -73,34 +91,35 @@ class Eloquent {
      * 
      * @return boolean
      */
-    public function isDirty(){
-        if(empty($this->{static::$primaryKey}))
+    public function isDirty()
+    {
+        if (empty($this->{static::$primaryKey}))
             return true;
-            
+
         $clonedData = static::findOrNew($this->{static::$primaryKey});
-        foreach($this as $key => $value){
-            if($value != $clonedData->$key)
-            {
+        foreach ($this as $key => $value) {
+            if ($value != $clonedData->$key) {
                 return true;
             }
         }
 
         return false;
     }
-     
+
     /**
      * @param array $filter
      * @return bool
      * 
      * check if data exist
      */
-    public function isDataExist(array $filter){
+    public function isDataExist(array $filter)
+    {
         $params = [
             "where" => $filter
         ];
-        
+
         $data = static::findAll($params);
-        if(count($data) > 0){
+        if (count($data) > 0) {
             return true;
         }
         return false;
@@ -112,8 +131,9 @@ class Eloquent {
      * 
      * Count All data
      */
-    public static function count(array $filter, $returnEntity = true){
-        
+    public static function count(array $filter, $returnEntity = true)
+    {
+
         $data = static::findAll($filter, $returnEntity);
         return count($data);
     }
@@ -124,18 +144,18 @@ class Eloquent {
      * 
      * get data from table by Id
      */
-    public static function find($id){
+    public static function find($id)
+    {
         $where = [
             'where' => [
                 static::$primaryKey => $id
             ]
         ];
         $data = static::findAll($where);
-        if(count($data) > 0){
+        if (count($data) > 0) {
             return $data[0];
         }
         return null;
-
     }
 
     /**
@@ -145,19 +165,20 @@ class Eloquent {
      * get data from table by Id or return new object
      */
 
-    public static function findOrNew($id){
-       
+    public static function findOrNew($id)
+    {
+
         $where = [
             'where' => [
                 static::$primaryKey => $id
             ]
         ];
         $data = static::findAll($where);
-        if(empty($data))
+        if (empty($data))
             return new static(self::$db);
         return $data[0];
     }
-    
+
     /**
      * @param int $id
      * @return App\Eloquents
@@ -165,14 +186,15 @@ class Eloquent {
      * 
      * get data from table by Id or return throw error
      */
-    public static function findOrFail($id){
+    public static function findOrFail($id)
+    {
         $where = [
             'where' => [
                 static::$primaryKey => $id
             ]
         ];
         $data = static::findAll($where);
-        if(count($data) == 0)
+        if (count($data) == 0)
             throw new DatabaseException("Cannot find data with id:$id");
         return $data[0];
     }
@@ -183,10 +205,11 @@ class Eloquent {
      * 
      * get first data of result from table   
      */
-    public static function findOne(array $filter = []){
-       
+    public static function findOne(array $filter = [])
+    {
+
         $data = static::findAll($filter);
-        if(empty($data))
+        if (empty($data))
             return null;
         return $data[0];
     }
@@ -197,10 +220,11 @@ class Eloquent {
      * 
      * get first data of result from table   
      */
-    public static function findOneOrNew(array $filter = []){
-       
+    public static function findOneOrNew(array $filter = [])
+    {
+
         $data = static::findAll($filter);
-        if(empty($data))
+        if (empty($data))
             return new static(self::$db);
         return $data[0];
     }
@@ -212,10 +236,11 @@ class Eloquent {
      * get first data of result from table or throw error  
      * 
      */
-    public static function findOneOrFail(array $filter = []){
-       
+    public static function findOneOrFail(array $filter = [])
+    {
+
         $data = static::findAll($filter);
-        if(empty($data))
+        if (empty($data))
             return new DatabaseException("Cannot find any data");
         return $data[0];
     }
@@ -226,14 +251,15 @@ class Eloquent {
      * 
      * get all data result from table
      */
-    public static function findAll(array $filter = [], $returnEntity = true, $columns = [], $chunked = false){
+    public static function findAll(array $filter = [], $returnEntity = true, $columns = [], $chunked = false)
+    {
         $entity = new static(self::$db);
         $entity->filter = $filter;
-        if($chunked)
+        if ($chunked)
             return $entity;
 
         $result = $entity->fetch($filter, $returnEntity,  $columns);
-        if(count($result) > 0 ){
+        if (count($result) > 0) {
             return $result;
         }
         return [];
@@ -245,27 +271,29 @@ class Eloquent {
      * 
      * get all data result from table or throw error
      */
-    public static function findAllOrFail(array $filter = [], $returnEntity = true, $columns = []){
+    public static function findAllOrFail(array $filter = [], $returnEntity = true, $columns = [])
+    {
         $entity = new static(self::$db);
         $result = $entity->fetch($filter, $returnEntity,  $columns);
-        if(count($result) > 0){
+        if (count($result) > 0) {
             return $result;
         }
         throw new DatabaseException("Cannot find any data");
     }
 
-     /**
+    /**
      * @param array $columnName
      * @return array Of specific column data
      * 
      * get all column data 
      */
-    public function chunk($columnName){
-        
+    public function chunk($columnName)
+    {
+
         $result = $this->fetch($this->filter);
-        if(count($result) > 0 ){
+        if (count($result) > 0) {
             $chunkedData = [];
-            foreach($result as $res){
+            foreach ($result as $res) {
                 $chunkedData[] = $res->$columnName;
             }
             return $chunkedData;
@@ -274,14 +302,55 @@ class Eloquent {
     }
 
     /**
+     * result data converted to Intended Model
+     * @return array
+     */
+
+    private function setToEntity($results, $type = "entity")
+    {
+
+        $listobject = [];
+        foreach ($results as $result) {
+            $newobject = null;
+            if($type = "entity"){
+                $class = get_class($this);
+                $newobject = new $class;
+            } else {
+                $newobject = new stdClass();
+            }
+
+            foreach ($result as $column => $value) {
+                if(!in_array($column, $this->hideFieldValue)){
+                    if ($this->escapeToOutput){
+                        if (!in_array($column, $this->nonEscapedField)){
+                            $newobject->$column = esc($value);
+                        } else {
+                            $newobject->$column = $value;
+                        }
+                    } else{ 
+                        $newobject->$column = $value;
+                    }
+                } else {
+                    unset($this->$column);
+                }
+            }
+            $listobject[] = $newobject;
+        }
+
+        return $listobject;
+    }
+
+
+    /**
      * @param array $filter
      * @return array App\Eloquent
      * 
      * get all data result from table
      */
-    public function fetch(array $filter = [], $returnEntity = true, $columns = []){
+    public function fetch(array $filter = [], $returnEntity = true, $columns = [])
+    {
 
-        if(!empty($filter)){
+        if (!empty($filter)) {
             $join = (isset($filter['join']) ? $filter['join'] : FALSE);
             $where = (isset($filter['where']) ? $filter['where'] : FALSE);
             $wherein = (isset($filter['whereIn']) ? $filter['whereIn'] : FALSE);
@@ -296,14 +365,14 @@ class Eloquent {
             $limit = (isset($filter['limit']) ? $filter['limit'] : FALSE);
             $group = (isset($filter['group']) ? $filter['group'] : FALSE);
 
-            if ($join){
-                foreach($join as $key => $vv){
-                    foreach($vv as $v){
-                        $type="";
-                        if(isset($v['type'])){
+            if ($join) {
+                foreach ($join as $key => $vv) {
+                    foreach ($vv as $v) {
+                        $type = "";
+                        if (isset($v['type'])) {
                             $type = $v['type'];
                         }
-                        $this->builder->join($key, $v['key'],$type);
+                        $this->builder->join($key, $v['key'], $type);
                     }
                 }
             }
@@ -313,23 +382,23 @@ class Eloquent {
             if ($orwhere)
                 $this->builder->orWhere($orwhere);
 
-            if ($wherein){
-                foreach($wherein as $key => $v){
-                    if(!empty($v))
+            if ($wherein) {
+                foreach ($wherein as $key => $v) {
+                    if (!empty($v))
                         $this->builder->whereIn($key, $v);
                 }
             }
 
-            if ($orwherein){
-                foreach($orwherein as $key => $v){
-                    if(!empty($v))
+            if ($orwherein) {
+                foreach ($orwherein as $key => $v) {
+                    if (!empty($v))
                         $this->builder->orWhereIn($key, $v);
                 }
             }
-            
-            if ($wherenotin){
-                foreach($wherenotin as $key => $v){
-                    if(!empty($v))
+
+            if ($wherenotin) {
+                foreach ($wherenotin as $key => $v) {
+                    if (!empty($v))
                         $this->builder->whereNotIn($key, $v);
                 }
             }
@@ -340,33 +409,33 @@ class Eloquent {
 
             if ($orlike)
                 $this->builder->orLike($orlike);
-            
-            if ($orlike){
-                foreach($orlike as $key => $v){
-                    if(!empty($v))
+
+            if ($orlike) {
+                foreach ($orlike as $key => $v) {
+                    if (!empty($v))
                         $this->builder->orLike($key, $v);
                 }
             }
 
-            if ($notlike){
-                foreach($notlike as $key => $v){
-                    if(!empty($v))
+            if ($notlike) {
+                foreach ($notlike as $key => $v) {
+                    if (!empty($v))
                         $this->builder->notLike($key, $v);
                 }
             }
 
-            if ($ornotlike){
-                foreach($ornotlike as $key => $v){
-                    if(!empty($v))
+            if ($ornotlike) {
+                foreach ($ornotlike as $key => $v) {
+                    if (!empty($v))
                         $this->builder->orNotLike($key, $v);
                 }
             }
 
-            if($group){
+            if ($group) {
                 $this->builder->groupStart();
-                foreach($group as $key => $v){
-                    if($key == 'orLike'){
-                        foreach($v as $orLikeKey => $orLikeValue){
+                foreach ($group as $key => $v) {
+                    if ($key == 'orLike') {
+                        foreach ($v as $orLikeKey => $orLikeValue) {
                             $this->builder->orLike($orLikeKey, $orLikeValue);
                         }
                     }
@@ -374,9 +443,9 @@ class Eloquent {
                 $this->builder->groupEnd();
             }
 
-            if ($order){
-                foreach($order as $key => $v){
-                    if(!empty($v))
+            if ($order) {
+                foreach ($order as $key => $v) {
+                    if (!empty($v))
                         $this->builder->orderBy($key, $v);
                 }
             }
@@ -385,27 +454,30 @@ class Eloquent {
                 $this->builder->limit($limit['size'], ($limit['page'] - 1) *  $limit['size']);
         }
         $result = null;
-        if($returnEntity){
-            $fields = self::$db->getFieldNames($this->table);
+        if ($returnEntity) {
 
-            $imploded = implode(",".$this->table.".",$fields);
-            $result = $this->builder->select($this->table.".".$imploded)->get()->getResult(get_class($this));
+            $fields = self::$db->getFieldNames($this->table);
+            $imploded = implode("," . $this->table . ".", $fields);
+
+            $results = $this->builder->select($this->table . "." . $imploded)->get()->getResult();
+            $result = $this->setToEntity($results, "entity");
         } else {
             $imploded = implode(",", $columns);
-            $result = $this->builder->select($imploded)->get()->getResult();
+            $results = $this->builder->select($imploded)->get()->getResult();
+            $result = $this->setToEntity($results, "stdClass");
         }
 
         // $result[] = self::$db->getLastQuery()->getQuery();
-            
+
         // echo json_encode($result);
         return $result;
-        
     }
 
     /**
      * will be executed before save function
      */
-    public function beforeSave(){
+    public function beforeSave()
+    {
     }
 
     /**
@@ -413,40 +485,39 @@ class Eloquent {
      * insert new data to table if $Id is empty or null other wise update the data
      */
 
-    public function save(){
+    public function save()
+    {
         $data = [];
-        if(!$this->isDirty())
+        if (!$this->isDirty())
             return true;
-            
+
         $this->beforeSave();
-        foreach($this->fields as $field){
-            if(is_null($this->$field)){
+        foreach ($this->fields as $field) {
+            if (is_null($this->$field)) {
                 $data[$field] = null;
                 continue;
             }
-            
-            if(!in_array($field, $this->nonEscapedField))
-                $data[$field] = htmlspecialchars($this->$field);
-            else 
-                $data[$field] = $this->$field;
+
+            $data[$field] = $this->$field;
         }
-        if(empty($this->{static::$primaryKey}) || is_null($this->{static::$primaryKey})){
-            if($this->builder->set($data, true)->insert()){
-                $this->{static::$primaryKey} =static::$db->insertID();
+        if (empty($this->{static::$primaryKey}) || is_null($this->{static::$primaryKey})) {
+            if ($this->builder->set($data, true)->insert()) {
+                $this->{static::$primaryKey} = static::$db->insertID();
                 return true;
             }
-        } else{
+        } else {
             $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
-            if($this->builder->update($data)){
+            if ($this->builder->update($data)) {
                 return true;
             }
         }
         return false;
     }
 
-    public function delete(){
+    public function delete()
+    {
         $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
-        if(!$this->builder->delete())
+        if (!$this->builder->delete())
             return false;
         return true;
     }
@@ -458,9 +529,10 @@ class Eloquent {
      * 
      * Get parent related table data
      */
-    public function hasOne(string $relatedEloquent, string $foreignKey, $params = []){
+    public function hasOne(string $relatedEloquent, string $foreignKey, $params = [])
+    {
         if (!empty($this->$foreignKey)) {
-            if(empty($params)){
+            if (empty($params)) {
                 $result = $relatedEloquent::find($this->$foreignKey);
                 return $result;
             } else {
@@ -486,9 +558,10 @@ class Eloquent {
      * 
      * Get parent related table data
      */
-    public function hasOneOrNew(string $relatedEloquent, string $foreignKey, $params = []){
+    public function hasOneOrNew(string $relatedEloquent, string $foreignKey, $params = [])
+    {
         $result = $this->hasOne($relatedEloquent, $foreignKey, $params);
-        if(!is_null($result)){
+        if (!is_null($result)) {
             return $result;
         }
         return new $relatedEloquent;
@@ -501,14 +574,15 @@ class Eloquent {
      * 
      * Get parent related table data
      */
-    public function hasOneOrFail(string $relatedEloquent, string $foreignKey, $params = []){
+    public function hasOneOrFail(string $relatedEloquent, string $foreignKey, $params = [])
+    {
         $result = $this->hasOne($relatedEloquent, $foreignKey, $params);
-        if(!is_null($result)){
+        if (!is_null($result)) {
             return $result;
         }
         return new DatabaseException("Cannot find any data");
     }
-    
+
     /**
      * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
      * @param string $foreignKey key name of related Eloquent
@@ -517,13 +591,14 @@ class Eloquent {
      * 
      * Get child related table data
      */
-    public function hasMany(string $relatedEloquent, string $foreignKey, $params = []){
-        if(!property_exists(get_class($this), 'primaryKey')){
+    public function hasMany(string $relatedEloquent, string $foreignKey, $params = [])
+    {
+        if (!property_exists(get_class($this), 'primaryKey')) {
             throw EloquentException::forNoPrimaryKey(get_class($this));
         }
 
-        if(!empty($this->{static::$primaryKey})){
-          
+        if (!empty($this->{static::$primaryKey})) {
+
 
             if (isset($params['where'])) {
                 $params['where'][$foreignKey] = $this->{static::$primaryKey};
@@ -533,7 +608,7 @@ class Eloquent {
                 ];
             }
             $result = $relatedEloquent::findAll($params);
-            if(count($result) > 0){
+            if (count($result) > 0) {
                 return $result;
             }
         }
@@ -570,7 +645,7 @@ class Eloquent {
             }
         }
 
-        
+
         return null;
     }
 
@@ -615,13 +690,13 @@ class Eloquent {
      * 
      * Get child related table data
      */
-    public function hasManyOrFail(string $relatedEloquent, string $foreignKey, $params = array()){
-          
+    public function hasManyOrFail(string $relatedEloquent, string $foreignKey, $params = array())
+    {
+
         $result = $this->hasMany($relatedEloquent, $foreignKey, $params);
-        if(!is_null($result)){
+        if (!is_null($result)) {
             return $result;
         }
         throw new DatabaseException("Cannot find any data");;
     }
-
 }
