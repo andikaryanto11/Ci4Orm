@@ -2,8 +2,8 @@
 
 namespace AndikAryanto11;
 
-use Andikaryanto11\Exception\DatabaseException;
-use Andikaryanto11\Exception\EloquentException;
+use AndikAryanto11\Exception\DatabaseException;
+use AndikAryanto11\Exception\EloquentException;
 use stdClass;
 
 /**
