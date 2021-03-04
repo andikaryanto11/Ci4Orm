@@ -340,15 +340,13 @@ class Eloquent
         return $listobject;
     }
 
-
     /**
-     * @param array $filter
-     * @return array App\Eloquent
+     * set filter to query builder
      * 
-     * get all data result from table
+     * @param array $filter
      */
-    public function fetch(array $filter = [], $returnEntity = true, $columns = [])
-    {
+
+    public function setFilters($filter = []){
 
         if (!empty($filter)) {
             $join = (isset($filter['join']) ? $filter['join'] : FALSE);
@@ -453,6 +451,20 @@ class Eloquent
             if ($limit)
                 $this->builder->limit($limit['size'], ($limit['page'] - 1) *  $limit['size']);
         }
+    }
+
+
+    /**
+     * @param array $filter
+     * @return array App\Eloquent
+     * 
+     * get all data result from table
+     */
+    public function fetch(array $filter = [], $returnEntity = true, $columns = [])
+    {
+
+        $this->setFilters($filter);
+
         $result = null;
         if ($returnEntity) {
 
