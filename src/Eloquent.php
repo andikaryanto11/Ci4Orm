@@ -96,7 +96,10 @@ class Eloquent
         if (empty($this->{static::$primaryKey}))
             return true;
 
-        $clonedData = static::findOrNew($this->{static::$primaryKey});
+        $clonedData = static::find($this->{static::$primaryKey});
+        if(empty($clonedData))
+            return true;
+            
         foreach ($this as $key => $value) {
             if ($value != $clonedData->$key) {
                 return true;
