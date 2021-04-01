@@ -53,9 +53,9 @@ class Eloquent
      * 
      */
 
-     /**
-      * Default data to output is escaped, set this field to non escape field
-      */
+    /**
+     * Default data to output is escaped, set this field to non escape field
+     */
     protected $nonEscapedField = [];
 
     /**
@@ -97,9 +97,9 @@ class Eloquent
             return true;
 
         $clonedData = static::find($this->{static::$primaryKey});
-        if(empty($clonedData))
+        if (empty($clonedData))
             return true;
-            
+
         foreach ($this as $key => $value) {
             if ($value != $clonedData->$key) {
                 return true;
@@ -315,7 +315,7 @@ class Eloquent
         $listobject = [];
         foreach ($results as $result) {
             $newobject = null;
-            if($type = "entity"){
+            if ($type = "entity") {
                 $class = get_class($this);
                 $newobject = new $class;
             } else {
@@ -323,14 +323,14 @@ class Eloquent
             }
 
             foreach ($result as $column => $value) {
-                if(!in_array($column, $this->hideFieldValue)){
-                    if ($this->escapeToOutput){
-                        if (!in_array($column, $this->nonEscapedField)){
+                if (!in_array($column, $this->hideFieldValue)) {
+                    if ($this->escapeToOutput) {
+                        if (!in_array($column, $this->nonEscapedField)) {
                             $newobject->$column = esc($value);
                         } else {
                             $newobject->$column = $value;
                         }
-                    } else{ 
+                    } else {
                         $newobject->$column = $value;
                     }
                 } else {
@@ -349,7 +349,8 @@ class Eloquent
      * @param array $filter
      */
 
-    public function setFilters($filter = []){
+    public function setFilters($filter = [])
+    {
 
         if (!empty($filter)) {
             $join = (isset($filter['join']) ? $filter['join'] : FALSE);
@@ -497,14 +498,44 @@ class Eloquent
 
     /**
      * @return bool
+     * insert new data to table
+     */
+    private function insert($data)
+    {
+        if ($this->builder->set($data, true)->insert()) {
+            $this->{static::$primaryKey} = static::$db->insertID();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     * update new data to table
+     */
+    private function update($data)
+    {
+        $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
+        if ($this->builder->update($data)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
      * insert new data to table if $Id is empty or null other wise update the data
+     * @param bool $isAutoIncrement your primary key of table
      */
 
-    public function save()
+    public function save($isAutoIncrement = true)
     {
         $data = [];
         if (!$this->isDirty())
             return true;
+
 
         $this->beforeSave();
         foreach ($this->fields as $field) {
@@ -516,14 +547,17 @@ class Eloquent
             $data[$field] = $this->$field;
         }
         if (empty($this->{static::$primaryKey}) || is_null($this->{static::$primaryKey})) {
-            if ($this->builder->set($data, true)->insert()) {
-                $this->{static::$primaryKey} = static::$db->insertID();
-                return true;
-            }
+            return $this->insert($data);
         } else {
-            $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
-            if ($this->builder->update($data)) {
-                return true;
+            if($isAutoIncrement){
+                return $this->update($data);
+            } else {
+                $existedData = static::find($this->{static::$primaryKey});
+                if(!$existedData){
+                    return $this->insert($data);
+                } else {
+                    return $this->update($data);
+                }
             }
         }
         return false;
