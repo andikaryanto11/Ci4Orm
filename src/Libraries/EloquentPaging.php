@@ -152,6 +152,6 @@ class EloquentPaging
 			'group'      => isset($filter['group']) ? $filter['group'] : null,
 		];
 		
-		return $this->eloquent::count($filter);
+		return $this->eloquent::count($params);
 	}
 }
