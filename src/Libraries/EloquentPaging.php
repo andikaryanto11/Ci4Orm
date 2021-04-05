@@ -33,7 +33,7 @@ class EloquentPaging
 		$this->output['CurrentPage'] = (int)$page;
 
 		$this->customRequest      = \Config\Services::request();
-		$this->output['GetQuery'] = createGetParam($queryParams);
+		$this->output['GetQuery'] = $this->createGetParam($queryParams);
 
 		if (! is_numeric($page))
 		{
@@ -44,6 +44,18 @@ class EloquentPaging
 			$this->page = $page;
 		}
 	}
+
+	private function createGetParam($params, $except = '')
+	{
+		if (! empty($except))
+		{
+			unset($params[$except]);
+		}
+	
+		$getQuery = http_build_query ($params);
+		return $getQuery;
+	}
+	
 
 	private function setPaging()
 	{
