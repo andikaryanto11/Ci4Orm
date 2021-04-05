@@ -4,6 +4,7 @@ namespace AndikAryanto11;
 
 use AndikAryanto11\Exception\DatabaseException;
 use AndikAryanto11\Exception\EloquentException;
+use AndikAryanto11\Libraries\EloquentList;
 use stdClass;
 
 /**
@@ -267,6 +268,19 @@ class Eloquent
         }
         return [];
     }
+
+     /**
+     * get all data result from table
+     * @param array $filter
+     * @return EloquentList
+     * 
+     */
+    public static function collect(array $filter = []){
+        $result = static::findAll($filter);
+        return new EloquentList($result);
+
+    }
+
 
     /**
      * @param array $filter
