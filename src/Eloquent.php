@@ -5,6 +5,7 @@ namespace AndikAryanto11;
 use AndikAryanto11\Exception\DatabaseException;
 use AndikAryanto11\Exception\EloquentException;
 use AndikAryanto11\Libraries\EloquentList;
+use AndikAryanto11\Libraries\EloquentPaging;
 use stdClass;
 
 /**
@@ -268,19 +269,6 @@ class Eloquent
         }
         return [];
     }
-
-     /**
-     * get all data result from table
-     * @param array $filter
-     * @return EloquentList
-     * 
-     */
-    public static function collect(array $filter = []){
-        $result = static::findAll($filter);
-        return new EloquentList($result);
-
-    }
-
 
     /**
      * @param array $filter
@@ -762,4 +750,30 @@ class Eloquent
         }
         throw new DatabaseException("Cannot find any data");;
     }
+
+     /**
+     * get all data result from table
+     * @param array $filter
+     * @return EloquentList
+     * 
+     */
+    public static function collect(array $filter = []){
+        $result = static::findAll($filter);
+        return new EloquentList($result);
+
+    }
+
+
+     /**
+     * get all data result from table
+     * @param array $filter
+     * @return EloquentList
+     * 
+     */
+    public static function paging($filter = [], $page = 1, $size = 6, $showedPage = 5, $queryParams = []){
+        $paging = new EloquentPaging(static::class, $filter, $page, $size, $showedPage, $queryParams);
+        return $paging->fetch();
+
+    }
+
 }
