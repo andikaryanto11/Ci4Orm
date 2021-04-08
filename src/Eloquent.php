@@ -4,6 +4,7 @@ namespace AndikAryanto11;
 
 use AndikAryanto11\Exception\DatabaseException;
 use AndikAryanto11\Exception\EloquentException;
+use AndikAryanto11\Libraries\Cast;
 use AndikAryanto11\Libraries\EloquentList;
 use AndikAryanto11\Libraries\EloquentPaging;
 use stdClass;
@@ -71,6 +72,13 @@ class Eloquent
      */
     protected $hideFieldValue = [];
 
+    /**
+     * Cast field to intended value,
+     * ex : [
+     *      "Field" => Cast::BOOLEAN
+     * ]
+     */
+    protected $cast = [];
 
     public function __construct(&$db)
     {
@@ -334,6 +342,10 @@ class Eloquent
                         }
                     } else {
                         $newobject->$column = $value;
+                    }
+
+                    if(array_key_exists($column, $this->cast)){
+                        Cast::casting($this->cast[$column], $newobject->$column);
                     }
                 } else {
                     unset($this->$column);

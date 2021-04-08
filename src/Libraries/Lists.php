@@ -28,7 +28,8 @@ class Lists implements IList
                 $newdata[] = $item;
             }
         }
-        return $newdata;
+        $this->items = $newdata;
+        return $this;
     }
 
     public function isEmpty()
@@ -67,6 +68,15 @@ class Lists implements IList
             throw new ListException("Item empty");
 
         return $this->items[0];
+    }
+
+    /**
+     * Get all items
+     * 
+     */
+    public function getItems()
+    {
+        return $this->items;
     }
 
     /**

@@ -177,11 +177,29 @@ class EloquentList extends Lists
     }
 
     /**
-     * Get all items
-     * 
+     * Get only unique data, data with no duplicate / same Id
+     * @return EloquestList
      */
-    public function getItems()
-    {
-        return $this->items;
+    public function unique(){
+        $keys = [];
+        $data = [];
+        foreach($this->items as $item){
+            if(!in_array($item->{get_class($item)::$primaryKey}, $keys)){
+                $keys[] = $item->{get_class($item)::$primaryKey};
+                $data[] = $item;
+            } else {
+                $index = 0;
+                foreach($keys as $key){
+                    if($key == $item->{get_class($item)::$primaryKey});
+                        break;
+                    $index++;
+                }
+                array_splice($keys, $index, 1);
+                array_splice($data, $index, 1);
+            }
+        }
+        $this->items = $data;
+        return $this;
     }
+
 }
