@@ -1,9 +1,15 @@
 # Codeigniter 4 ORM
-This package is created to map your database to entity / Class you make
+This package is created to map your database to entity / Class you make. 
+Inspired by .NET Enitity Framwork.
 
 # Rules
   Create class then Extends to this Eloquent
 
+# Install
+  
+    composer require andikaryanto11/ci4orm:dev-master
+
+# Props
   - protected $table = "your_table_name" is mandatory property you have to set
   - static $primaryKey = "your_primary_key_field_name" is mandatory property you have to set
 
@@ -24,9 +30,24 @@ This package is created to map your database to entity / Class you make
           }
         }
 
-# Install
-  
-    composer require andikaryanto11/ci4orm:dev-master
+  - protected $hideFieldValue = [ ] , when you put field  in this array the field will be unset when you fetch data from eloquent
+
+        protected $hideFieldValue = [ 'Password' ]
+
+  - protected $cast = [], when you put field  in this array the field will be casted to specific datatype when you fetch data from eloquent. available cast datatype will be : 
+        - integer
+        - boolean
+        - decimal:2 -> 2 will be decimal digit
+        - datetime:Y-m-d -> Y-m-d will be formatted date
+        - string 
+
+        protected $cast = [
+          'Id'             => 'integer',
+          'IsLoggedIn'     => 'boolean',
+          'Paid'           => 'decimal:2',
+          'Created'        => 'datetime:Y-m-d',
+        ];
+
 
 
 # Method
@@ -198,16 +219,47 @@ This package is created to map your database to entity / Class you make
         //$params is nullable
         // $child is data parent of your related table or new object;
 
+  - hasFirst(string $relatedEloquent, string $foreignKey, $params = [])
+    Will get first data
+
+        $ent = Entity::find(1);
+
+        $params = [
+          "where" => [
+            "colum_name" => "some_value"
+          ]
+        ];
+
+        $child = $ent->hasFirst("Your\EntityNamespace\EntityName", "$ent foregin_key_name", $params);
+        //$params is nullable
+        // $child is data parent of your related table or new object;
+
+  - collect(array $filter = [])
+    Will return EloquentList, open in vendor folder to see available method.
+
+        $obj = Entity::collect()
+  
+  - paging($filter = [], $page = 1, $size = 6, $showedPage = 5, $queryParams = [])
+    Will return array of data and othe property
+
+        $obj = Entity::paging([], 1, 6, 5, []);
+
+  - datatables(array $filter = [], boolean $returnEntity = true, boolean $useIndex = true)
+    Will return EloquentDatatables, open vendor folder to see available method.
+
+
+        $obj = Entity::datatables([], true, true);
+
 # Params ($params)
 
   General for $params that's used to filter data
 
         $params = [
           "join" => [
-            "table_name" => [
-                "Key" => "table_name.key = table_name.key",
-                "Type" => "LEFT" || "RIGHT" //optional
-            ]
+            "table_name" => [[
+                "key" => "table_name.key = table_name.key",
+                "type" => "LEFT" || "RIGHT" //optional
+            ]]
           ],
           "you can add more key params below, 'where', 'whereIn', etc"
         ];

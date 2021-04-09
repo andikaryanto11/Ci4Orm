@@ -5,6 +5,7 @@ namespace AndikAryanto11;
 use AndikAryanto11\Exception\DatabaseException;
 use AndikAryanto11\Exception\EloquentException;
 use AndikAryanto11\Libraries\Cast;
+use AndikAryanto11\Libraries\EloquentDatatables;
 use AndikAryanto11\Libraries\EloquentList;
 use AndikAryanto11\Libraries\EloquentPaging;
 use stdClass;
@@ -776,16 +777,35 @@ class Eloquent
     }
 
 
-     /**
+    /**
      * get all data result from table
      * @param array $filter
+     * @param int $page
+     * @param int $size
+     * @param int $shoedPage
+     * @param array $queryParams wil be generated as query params
      * @return EloquentList
      * 
      */
-    public static function paging($filter = [], $page = 1, $size = 6, $showedPage = 5, $queryParams = []){
+    public static function paging($filter = [], $page = 1, $size = 6, $showedPage = 5, $queryParams = [])
+    {
         $paging = new EloquentPaging(static::class, $filter, $page, $size, $showedPage, $queryParams);
         return $paging->fetch();
+    }
 
+
+    /**
+     * Get datatables server side  results array
+     * @param array $filter
+     * @param boolean $returnEntity set to true array data will contain entity of class which call this function 
+     * @param boolean $useIndex set to false if datatables in front end use column name
+     * @return EloquentDatatables
+     * 
+     */
+    public static function datatables($filter = [], $returnEntity = true, $useIndex = true)
+    {
+        $datatables = new EloquentDatatables($filter, $returnEntity, $useIndex, static::class);
+        return $datatables;
     }
 
 }
