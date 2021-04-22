@@ -281,7 +281,7 @@ class Eloquent
 
     /**
      * @param array $filter
-     * @return array App\Eloquent
+     * @return array App\Eloquent   
      * 
      * get all data result from table or throw error
      */
