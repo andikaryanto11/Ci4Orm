@@ -213,6 +213,8 @@ class Eloquent
         return $data[0];
     }
 
+    
+
     /**
      * @param array $filter
      * @return App\Eloquent
@@ -281,7 +283,7 @@ class Eloquent
 
     /**
      * @param array $filter
-     * @return array App\Eloquent   
+     * @return array App\Eloquent
      * 
      * get all data result from table or throw error
      */
@@ -634,6 +636,7 @@ class Eloquent
     /**
      * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
      * @param string $foreignKey key name of this Eloquent
+     * @param array $params 
      * @return Eloquent Object or Error
      * 
      * Get parent related table data
@@ -641,6 +644,52 @@ class Eloquent
     public function hasOneOrFail(string $relatedEloquent, string $foreignKey, $params = [])
     {
         $result = $this->hasOne($relatedEloquent, $foreignKey, $params);
+        if (!is_null($result)) {
+            return $result;
+        }
+        return new DatabaseException("Cannot find any data");
+    }
+
+    /**
+     * Reverse of has one
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of this Eloquent
+     * @param array $params 
+     * @return null
+     */
+    public function belongsTo(string $relatedEloquent, string $foreignKey, $params = []){
+
+        if (!empty($this->$foreignKey)) {
+            if (empty($params)) {
+                $result = $relatedEloquent::find($this->$foreignKey);
+                return $result;
+            } else {
+                if (isset($params['where'])) {
+                    $params['where'][$relatedEloquent::$primaryKey] = $this->$foreignKey;
+                } else {
+                    $params['where'] = [
+                        $relatedEloquent::$primaryKey => $this->$foreignKey
+                    ];
+                }
+                $result = $relatedEloquent::findOne($params);
+                return $result;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Reverse of has one
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of this Eloquent
+     * @param array $params 
+     * @return Eloquen
+     * @throws DatabaseException
+     */
+    public function belongsToOrFail(string $relatedEloquent, string $foreignKey, $params = []){
+
+        $result = $this->belongsTo($relatedEloquent, $foreignKey, $params);
         if (!is_null($result)) {
             return $result;
         }
