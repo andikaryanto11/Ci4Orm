@@ -18,7 +18,7 @@ class Cast
                case "decimal":
 
                     if (count($newType) == 2)
-                         $value = number_format($value, $newType[1]);
+                         $value = number_format($value, $newType[1], ",", ".");
                     return;
                case "integer":
                     $value = (int)$value;

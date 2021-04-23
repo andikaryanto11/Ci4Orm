@@ -112,8 +112,10 @@ class Eloquent
             return true;
 
         foreach ($this as $key => $value) {
-            if ($value != $clonedData->$key) {
-                return true;
+            if (in_array($key, $this->fields)) {    
+                if ($value != $clonedData->$key) {
+                    return true;
+                }
             }
         }
 
@@ -213,7 +215,7 @@ class Eloquent
         return $data[0];
     }
 
-    
+
 
     /**
      * @param array $filter
@@ -347,7 +349,7 @@ class Eloquent
                         $newobject->$column = $value;
                     }
 
-                    if(array_key_exists($column, $this->cast)){
+                    if (array_key_exists($column, $this->cast)) {
                         Cast::casting($this->cast[$column], $newobject->$column);
                     }
                 } else {
@@ -566,11 +568,11 @@ class Eloquent
         if (empty($this->{static::$primaryKey}) || is_null($this->{static::$primaryKey})) {
             return $this->insert($data);
         } else {
-            if($isAutoIncrement){
+            if ($isAutoIncrement) {
                 return $this->update($data);
             } else {
                 $existedData = static::find($this->{static::$primaryKey});
-                if(!$existedData){
+                if (!$existedData) {
                     return $this->insert($data);
                 } else {
                     return $this->update($data);
@@ -657,7 +659,8 @@ class Eloquent
      * @param array $params 
      * @return null
      */
-    public function belongsTo(string $relatedEloquent, string $foreignKey, $params = []){
+    public function belongsTo(string $relatedEloquent, string $foreignKey, $params = [])
+    {
 
         if (!empty($this->$foreignKey)) {
             if (empty($params)) {
@@ -687,7 +690,8 @@ class Eloquent
      * @return Eloquen
      * @throws DatabaseException
      */
-    public function belongsToOrFail(string $relatedEloquent, string $foreignKey, $params = []){
+    public function belongsToOrFail(string $relatedEloquent, string $foreignKey, $params = [])
+    {
 
         $result = $this->belongsTo($relatedEloquent, $foreignKey, $params);
         if (!is_null($result)) {
@@ -813,16 +817,16 @@ class Eloquent
         throw new DatabaseException("Cannot find any data");;
     }
 
-     /**
+    /**
      * get all data result from table
      * @param array $filter
      * @return EloquentList
      * 
      */
-    public static function collect(array $filter = []){
+    public static function collect(array $filter = [])
+    {
         $result = static::findAll($filter);
         return new EloquentList($result);
-
     }
 
 
@@ -856,5 +860,4 @@ class Eloquent
         $datatables = new EloquentDatatables($filter, $returnEntity, $useIndex, static::class);
         return $datatables;
     }
-
 }
