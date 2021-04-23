@@ -304,7 +304,7 @@ class EloquentDatatables
                          $newobj = new $this->eloquent;
                          if ($newobj->getTableName() !== $col[0]) {
                               $selectedColumn = $col[1];
-                              return $data->hasOneOrNew($nameSpace[0] . '\\' . $nameSpace[1] . '\\' . $col[0], $column['foreignKey'])->$selectedColumn;
+                              return $data->hasOneOrNew($nameSpace[0] . '\\' . $nameSpace[1] . '\\' . ucfirst($col[0]), $column['foreignKey'])->$selectedColumn;
                          } else {
                               $selectedColumn = $col[1];
                               return $data->$selectedColumn;
