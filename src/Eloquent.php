@@ -259,7 +259,7 @@ class Eloquent
 
         $data = static::findAll($filter);
         if (empty($data))
-            return new DatabaseException("Cannot find any data");
+            throw new DatabaseException("Cannot find any data");
         return $data[0];
     }
 
@@ -649,7 +649,7 @@ class Eloquent
         if (!is_null($result)) {
             return $result;
         }
-        return new DatabaseException("Cannot find any data");
+        throw new DatabaseException("Cannot find any data");
     }
 
     /**
@@ -697,7 +697,7 @@ class Eloquent
         if (!is_null($result)) {
             return $result;
         }
-        return new DatabaseException("Cannot find any data");
+        throw new DatabaseException("Cannot find any data");
     }
 
     /**
