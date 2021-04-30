@@ -123,10 +123,16 @@ class EloquentDatatables
 
           if (!empty($this->request->getPost('customFilter'))) {
                $searchValue = $this->request->getPost('customFilter');
+               $strparam = 'and';
+               if (empty($params['where']))
+                    $params["where"] = [
+                         1 => 1
+                    ];
                foreach ($searchValue as $key => $value) {
-                    $strparam = 'orLike';
 
-                    if(!empty($value))
+
+
+                    if (!empty($value))
                          $params['group'][$strparam][$key] = $value;
                }
           }
@@ -159,17 +165,17 @@ class EloquentDatatables
 
      public function populate()
      {
-          try {
-               $params = $this->setParams();
-               $result = $this->eloquent::findAll($params, $this->returnEntity, $this->getColumnsOnly());
+          // try {
+          $params = $this->setParams();
+          $result = $this->eloquent::findAll($params, $this->returnEntity, $this->getColumnsOnly());
 
-               $this->output['draw']            = !empty($this->request->getPost('draw')) ? intval($this->request->getPost('draw')) : 0;
-               $this->output['recordsTotal']    = intval(count($result));
-               $this->output['recordsFiltered'] = intval($this->allData($params));
-               $this->output['data']            = $this->output($result);
-          } catch (Exception $e) {
-               $this->output['error'] = $e->getMessage();
-          }
+          $this->output['draw']            = !empty($this->request->getPost('draw')) ? intval($this->request->getPost('draw')) : 0;
+          $this->output['recordsTotal']    = intval(count($result));
+          $this->output['recordsFiltered'] = intval($this->allData($params));
+          $this->output['data']            = $this->output($result);
+          // } catch (Exception $e) {
+          //      $this->output['error'] = $e->getMessage();
+          // }
 
           return $this->output;
      }

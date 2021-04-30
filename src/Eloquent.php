@@ -460,6 +460,11 @@ class Eloquent
                             $this->builder->orLike($orLikeKey, $orLikeValue);
                         }
                     }
+                    if ($key == 'and') {
+                        foreach ($v as $andKey => $andValue) {
+                            $this->builder->where([$andKey => $andValue]);
+                        }
+                    }
                 }
                 $this->builder->groupEnd();
             }
