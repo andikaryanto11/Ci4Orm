@@ -12,6 +12,9 @@ class Cast
 
           $newType = explode(":", $type);
           switch ($newType[0]) {
+               case "double":
+                    $value = (double)$value;
+                    return;
                case "boolean":
                     $value = (bool)$value;
                     return;
@@ -19,6 +22,9 @@ class Cast
 
                     if (count($newType) == 2)
                          $value = number_format($value, $newType[1], ",", ".");
+                    return;
+               case "float":
+                    $value = (float)$value;
                     return;
                case "integer":
                     $value = (int)$value;

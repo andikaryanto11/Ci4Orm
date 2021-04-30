@@ -121,6 +121,16 @@ class EloquentDatatables
                }
           }
 
+          if (!empty($this->request->getPost('customFilter'))) {
+               $searchValue = $this->request->getPost('customFilter');
+               foreach ($searchValue as $key => $value) {
+                    $strparam = 'orLike';
+
+                    if(!empty($value))
+                         $params['group'][$strparam][$key] = $value;
+               }
+          }
+
           if ($this->request->getPost('order') && count($this->request->getPost('order'))) {
                $order = $this->request->getPost('order')[0];
 

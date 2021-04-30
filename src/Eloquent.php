@@ -554,8 +554,7 @@ class Eloquent
         $data = [];
         if (!$this->isDirty())
             return true;
-
-
+        
         $this->beforeSave();
         foreach ($this->fields as $field) {
             if (is_null($this->$field)) {
