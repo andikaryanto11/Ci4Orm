@@ -32,6 +32,24 @@ class Lists implements IList
         return $this;
     }
 
+    public function where($callback)
+    {
+        $newdata = [];
+        foreach ($this->items as $item) {
+            if ($callback($item)) {
+                $newdata[] = $item;
+            }
+        }
+        return $newdata;
+    }
+
+    public function whereOne($callback){
+        $datas = $this->where($callback);
+        if(!empty($datas))
+            return $datas[0];
+        return null;
+    }
+
     public function isEmpty()
     {
         return empty($this->items);
