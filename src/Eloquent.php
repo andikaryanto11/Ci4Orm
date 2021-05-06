@@ -586,11 +586,20 @@ class Eloquent
         return false;
     }
 
+    /**
+     * Delete data where primary key in object is not null, throw while primary key null
+     * @throws DatabaseException
+     */
     public function delete()
     {
+        if(empty($this->{static::$primaryKey}))
+            throw new DatabaseException("Couldn't Find Any Data To Delete");
+
         $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
         if (!$this->builder->delete())
             return false;
+
+        $this->{static::$primaryKey} = null;
         return true;
     }
 
