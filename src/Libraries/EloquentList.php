@@ -9,8 +9,8 @@ class EloquentList extends Lists
     protected $eloquentclass = "";
     public function __construct($items = [])
     {
-        if (!empty($items))
-            $this->eloquentclass = get_class($items[0]);
+        // if (!empty($items))
+        //     $this->eloquentclass = get_class($items[0]);
         parent::__construct($items);
     }
 
@@ -21,11 +21,11 @@ class EloquentList extends Lists
     public function add($item)
     {
 
-        if ($this->eloquentclass != get_class($item)) {
-            $classname = $this->eloquentclass;
-            $ginevclassname = get_class($item);
-            throw new ListException("Cannot add item, expected $classname, $ginevclassname given");
-        }
+        // if ($this->eloquentclass != get_class($item)) {
+        //     $classname = $this->eloquentclass;
+        //     $ginevclassname = get_class($item);
+        //     throw new ListException("Cannot add item, expected $classname, $ginevclassname given");
+        // }
 
         $this->items[] = $item;
     }
