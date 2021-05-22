@@ -8,6 +8,8 @@ use AndikAryanto11\Libraries\Cast;
 use AndikAryanto11\Libraries\EloquentDatatables;
 use AndikAryanto11\Libraries\EloquentList;
 use AndikAryanto11\Libraries\EloquentPaging;
+use Exception;
+use ReflectionClass;
 use stdClass;
 
 /**
@@ -89,12 +91,38 @@ class Eloquent
 
         self::$db = $db;
         $this->builder = self::$db->table($this->getTableName());
-        $this->fields = self::$db->getFieldNames($this->getTableName());
+        $this->fields = static::getProperties();
     }
 
     public function getTableName()
     {
         return $this->table;
+    }
+
+    /**
+     * get columns of table
+     */
+    public static function getProperties(){
+        $class = new ReflectionClass(static::class);
+        $props = $class->getDefaultProperties();
+        unset($props['primaryKey']);
+        unset($props['db']);
+        unset($props['table']);
+        unset($props['hideFieldValue']);
+        unset($props['dbs']);
+        unset($props['validation']);
+        unset($props['request']);
+        unset($props['builder']);
+        unset($props['fields']);
+        unset($props['filter']);
+        unset($props['nonEscapedField']);
+        unset($props['escapeToOutput']);
+        unset($props['cast']);
+        $newProps = [];
+        foreach($props as $key => $value){
+            $newProps[] = $key;
+        }
+        return $newProps;
     }
 
     /**
@@ -112,7 +140,7 @@ class Eloquent
             return true;
 
         foreach ($this as $key => $value) {
-            if (in_array($key, $this->fields)) {    
+            if (in_array($key, $this->fields)) {
                 if ($value != $clonedData->$key) {
                     return true;
                 }
@@ -150,8 +178,11 @@ class Eloquent
     public static function count(array $filter, $returnEntity = true)
     {
 
-        $data = static::findAll($filter, $returnEntity);
-        return count($data);
+        // $data = static::findAll($filter, $returnEntity);
+
+        $entity = new static(self::$db);
+        return $entity->countData($filter);
+        // return count($data);
     }
 
     /**
@@ -496,10 +527,19 @@ class Eloquent
         $result = null;
         if ($returnEntity) {
 
-            $fields = self::$db->getFieldNames($this->table);
-            $imploded = implode("," . $this->table . ".", $fields);
+            $fields = []; 
+            $imploded = null;
+            $results = null;
+            if(empty($columns)){
+                $fields = static::getProperties();
+                $imploded = implode("," . $this->table . ".", $fields);
+                $results = $this->builder->select($this->table . "." . $imploded)->get()->getResult();
+            } else {
+                $fields = $columns;
+                $imploded = implode("," , $fields);
+                $results = $this->builder->select($imploded)->get()->getResult();
+            }
 
-            $results = $this->builder->select($this->table . "." . $imploded)->get()->getResult();
             $result = $this->setToEntity($results, "entity");
         } else {
             $imploded = implode(",", $columns);
@@ -512,6 +552,19 @@ class Eloquent
         // echo json_encode($result);
         return $result;
     }
+
+
+    /**
+     * count table data
+     * @param array $filter
+     * @return int
+     */
+    public function countData(array $filter = []){
+        $this->setFilters($filter);
+        $result = $this->builder->selectCount($this->table . "." .static::$primaryKey)->get()->getResult();
+        return (int)$result[0]->{static::$primaryKey};
+    }
+
 
     /**
      * will be executed before save function
@@ -559,7 +612,7 @@ class Eloquent
         $data = [];
         if (!$this->isDirty())
             return true;
-        
+
         $this->beforeSave();
         foreach ($this->fields as $field) {
             if (is_null($this->$field)) {
