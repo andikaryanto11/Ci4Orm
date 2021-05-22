@@ -83,12 +83,17 @@ class Eloquent
      */
     protected $cast = [];
 
+    /**
+     * Eager Load related classes
+     */
+    private $relatedClass = [];
+
     public function __construct(&$db)
     {
         if (!property_exists(get_class($this), 'table')) {
             throw EloquentException::forNoTableName(get_class($this));
         }
-
+		helper('inflector');
         self::$db = $db;
         $this->builder = self::$db->table($this->getTableName());
         $this->fields = static::getProperties();
@@ -355,7 +360,7 @@ class Eloquent
      * @return array
      */
 
-    private function setToEntity($results, $type = "entity")
+    private function setToEntity($results, $type = "entity", $withRelatedData)
     {
 
         $listobject = [];
@@ -368,7 +373,13 @@ class Eloquent
                 $newobject = new stdClass();
             }
 
+            $related = new stdClass;
+            $related->ClassName = null;
+            $related->Data = null;
+            $isFound = false;
+
             foreach ($result as $column => $value) {
+
                 if (!in_array($column, $this->hideFieldValue)) {
                     if ($this->escapeToOutput) {
                         if (!in_array($column, $this->nonEscapedField)) {
@@ -385,8 +396,19 @@ class Eloquent
                     }
                 } else {
                     unset($this->$column);
+                } 
+            }
+
+            if(!is_null($withRelatedData)){;
+                foreach($withRelatedData as $relatedData){
+                    $findRelated = function($item) use ($newobject, $relatedData){
+                        return $newobject->{$relatedData->ForeignKey} == $item->{get_class($item)::$primaryKey};
+                    };
+                    $relatedDataFound = $relatedData->Data->where($findRelated);
+                    $newobject->{$relatedData->ClassName} = empty($relatedDataFound) ? null : $relatedDataFound[0];
                 }
             }
+
             $listobject[] = $newobject;
         }
 
@@ -525,11 +547,12 @@ class Eloquent
         $this->setFilters($filter);
 
         $result = null;
+        $fields = []; 
+        $imploded = null;
+        $results = null;
+        $withRelated = null;
         if ($returnEntity) {
 
-            $fields = []; 
-            $imploded = null;
-            $results = null;
             if(empty($columns)){
                 $fields = static::getProperties();
                 $imploded = implode("," . $this->table . ".", $fields);
@@ -540,17 +563,65 @@ class Eloquent
                 $results = $this->builder->select($imploded)->get()->getResult();
             }
 
-            $result = $this->setToEntity($results, "entity");
+            if(!empty($this->relatedClass))
+                $withRelated = $this->fetchRelatedData($results);
+            // echo json_encode($withRelated);
+            $result = $this->setToEntity($results, "entity", $withRelated);
         } else {
             $imploded = implode(",", $columns);
             $results = $this->builder->select($imploded)->get()->getResult();
-            $result = $this->setToEntity($results, "stdClass");
+            if(!empty($this->relatedClass))
+                $withRelated = $this->fetchRelatedData($results);
+            $result = $this->setToEntity($results, "stdClass", $withRelated);
         }
 
         // $result[] = self::$db->getLastQuery()->getQuery();
 
         // echo json_encode($result);
         return $result;
+    }
+
+    /**
+     * Eeager Load Query 
+     */
+    public static function with($relatedClass){
+        $instance = new static(static::$db);
+        $instance->relatedClass[] = $relatedClass;
+        return $instance;
+        
+    }
+
+    /**
+     * Get Related Data as array, used with "with" function for Eager Load
+     * @param array $results of object
+     * @return array
+     */
+
+    private function fetchRelatedData($results){
+        $resultRelatedData = [];
+        $collectionResult = new EloquentList($results);
+        $fieldValues = null;
+        foreach($this->relatedClass as $related){
+            $nameSpace = $related["Class"];
+            $nameSpaceArr = explode("\\", $nameSpace);
+            $className = $nameSpaceArr[count($nameSpaceArr) - 1];
+            $fieldValues = $collectionResult->chunkUnique( $related["ForeignKey"]);
+
+            $params = [
+                "whereIn" => [
+                    $nameSpace::$primaryKey => $fieldValues 
+                ]
+            ];
+
+            $fetchedData = $nameSpace::collect($params);
+            $result = [
+                "ForeignKey" => $related["ForeignKey"],
+                "ClassName" => $className,
+                "Data" => $fetchedData
+            ];
+            $resultRelatedData[] = (object)$result;   
+        }
+        return $resultRelatedData;
     }
 
 
