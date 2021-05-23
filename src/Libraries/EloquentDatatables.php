@@ -311,43 +311,19 @@ class EloquentDatatables
       */
      private function getColValue($column, $data)
      {
-          if ($this->returnEntity) {
-               $nameSpace = explode('\\', $this->eloquent);
-
-               if (!is_null($column['column'])) {
-                    $col = explode('.', $column['column']);
-                    if (count($col) === 3) {
-                         $newobj = new $this->eloquent;
-                         if ($newobj->getTableName() !== $col[0]) {
-                              $selectedColumn = $col[1];
-                              return $data->hasOneOrNew($nameSpace[0] . '\\' . $nameSpace[1] . '\\' . ucfirst($col[0]), $column['foreignKey'])->$selectedColumn;
-                         } else {
-                              $selectedColumn = $col[1];
-                              return $data->$selectedColumn;
-                         }
-                    } else if (count($col) === 2) {
-                         $selectedColumn = $col[1];
-                         return $data->$selectedColumn;
-                    } else {
-                         $selectedColumn = $col[0];
-                         return $data->$selectedColumn;
-                    }
-               }
+          
+          $col        = explode('.', $column['column']);
+          $columnname = null;
+          if (count($col) === 3) {
+               $columnname = $col[2];
+               return $data->$columnname;
+          } else if (count($col) === 2) {
+               $columnname = $col[1];
+               return $data->$columnname;
           } else {
-               $col        = explode('.', $column['column']);
-               $columnname = null;
-               if (count($col) === 3) {
-                    $columnname = $col[2];
-                    return $data->$columnname;
-               } else if (count($col) === 2) {
-                    $columnname = $col[1];
-                    return $data->$columnname;
-               } else {
-                    $columnname = $column['column'];
-                    return $data->$columnname;
-               }
+               $columnname = $column['column'];
+               return $data->$columnname;
           }
-          return null;
      }
 
      /**
