@@ -73,6 +73,23 @@ class EloquentList extends Lists
     }
 
     /**
+     * Get data value form column name
+     */
+
+    public function chunkUnique(string $columnName)
+    {
+        $data = [];
+        foreach ($this->items as $item) {
+            if (!property_exists($item, $columnName)) {
+                throw new ListException("Column '$columnName' is not found");
+            }
+            if(!in_array($item->$columnName, $data))
+                $data[] = $item->$columnName;
+        }
+        return $data;
+    }
+
+    /**
      * loop Items and return each
      * @param funtion fn($item)
      */

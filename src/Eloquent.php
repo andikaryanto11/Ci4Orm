@@ -584,9 +584,11 @@ class Eloquent
     /**
      * Eeager Load Query 
      */
-    public static function with($relatedClass){
+    public static function with($relatedClasses){
         $instance = new static(static::$db);
-        $instance->relatedClass[] = $relatedClass;
+        foreach($relatedClasses as $relatedClass){
+            $instance->relatedClass[] = $relatedClass;
+        }
         return $instance;
         
     }
