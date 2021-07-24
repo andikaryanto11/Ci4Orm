@@ -7,7 +7,7 @@ Inspired by .NET Enitity Framwork.
 
 # Install
   
-    composer require andikaryanto11/ci4orm:dev-master
+    composer require andikaryanto11/ci4orm
 
 # Props
   - protected $table = "your_table_name" is mandatory property you have to set
