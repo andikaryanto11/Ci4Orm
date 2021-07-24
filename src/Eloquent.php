@@ -88,6 +88,12 @@ class Eloquent
      */
     private $relatedClass = [];
 
+    /**
+     * Orignal Data
+     */
+
+    private $originalData;
+
     public function __construct(&$db)
     {
         if (!property_exists(get_class($this), 'table')) {
@@ -123,6 +129,7 @@ class Eloquent
         unset($props['nonEscapedField']);
         unset($props['escapeToOutput']);
         unset($props['cast']);
+        unset($props['originalData']);
         $newProps = [];
         foreach($props as $key => $value){
             $newProps[] = $key;
@@ -140,7 +147,7 @@ class Eloquent
         if (empty($this->{static::$primaryKey}))
             return true;
 
-        $clonedData = static::find($this->{static::$primaryKey});
+        $clonedData = $this->getOriginalData();
         if (empty($clonedData))
             return true;
 
@@ -409,6 +416,8 @@ class Eloquent
                 }
             }
 
+            $newobject->originalData = clone $newobject;
+
             $listobject[] = $newobject;
         }
 
@@ -537,7 +546,7 @@ class Eloquent
 
     /**
      * @param array $filter
-     * @return array App\Eloquent
+     * @return array
      * 
      * get all data result from table
      */
@@ -685,7 +694,7 @@ class Eloquent
         $data = [];
         if (!$this->isDirty())
             return true;
-
+        
         $this->beforeSave();
         foreach ($this->fields as $field) {
             if (is_null($this->$field)) {
@@ -998,5 +1007,13 @@ class Eloquent
     {
         $datatables = new EloquentDatatables($filter, $returnEntity, $useIndex, static::class);
         return $datatables;
+    }
+
+    /**
+     * Return data before it's modified
+     * @return static 
+     */
+    public function getOriginalData(){
+        return $this->originalData;
     }
 }
