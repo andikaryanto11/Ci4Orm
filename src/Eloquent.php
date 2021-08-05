@@ -8,6 +8,7 @@ use AndikAryanto11\Libraries\Cast;
 use AndikAryanto11\Libraries\EloquentDatatables;
 use AndikAryanto11\Libraries\EloquentList;
 use AndikAryanto11\Libraries\EloquentPaging;
+use CodeIgniter\Database\BaseConnection;
 use Exception;
 use ReflectionClass;
 use stdClass;
@@ -28,7 +29,7 @@ class Eloquent
     /**
      * Database Connection
      *
-     * @var ConnectionInterface
+     * @var BaseConnection
      */
     protected static $db;
 
@@ -88,12 +89,18 @@ class Eloquent
      */
     private $relatedClass = [];
 
+    /**
+     * Orignal Data
+     */
+
+    private $originalData;
+
     public function __construct(&$db)
     {
         if (!property_exists(get_class($this), 'table')) {
             throw EloquentException::forNoTableName(get_class($this));
         }
-		helper('inflector');
+        helper('inflector');
         self::$db = $db;
         $this->builder = self::$db->table($this->getTableName());
         $this->fields = static::getProperties();
@@ -107,7 +114,8 @@ class Eloquent
     /**
      * get columns of table
      */
-    public static function getProperties(){
+    public static function getProperties()
+    {
         $class = new ReflectionClass(static::class);
         $props = $class->getDefaultProperties();
         unset($props['primaryKey']);
@@ -123,8 +131,9 @@ class Eloquent
         unset($props['nonEscapedField']);
         unset($props['escapeToOutput']);
         unset($props['cast']);
+        unset($props['originalData']);
         $newProps = [];
-        foreach($props as $key => $value){
+        foreach ($props as $key => $value) {
             $newProps[] = $key;
         }
         return $newProps;
@@ -140,7 +149,7 @@ class Eloquent
         if (empty($this->{static::$primaryKey}))
             return true;
 
-        $clonedData = static::find($this->{static::$primaryKey});
+        $clonedData = $this->getOriginalData();
         if (empty($clonedData))
             return true;
 
@@ -396,18 +405,20 @@ class Eloquent
                     }
                 } else {
                     unset($this->$column);
-                } 
+                }
             }
 
-            if(!is_null($withRelatedData)){;
-                foreach($withRelatedData as $relatedData){
-                    $findRelated = function($item) use ($newobject, $relatedData){
+            if (!is_null($withRelatedData)) {;
+                foreach ($withRelatedData as $relatedData) {
+                    $findRelated = function ($item) use ($newobject, $relatedData) {
                         return $newobject->{$relatedData->ForeignKey} == $item->{get_class($item)::$primaryKey};
                     };
                     $relatedDataFound = $relatedData->Data->where($findRelated);
                     $newobject->{$relatedData->ClassName} = empty($relatedDataFound) ? null : $relatedDataFound[0];
                 }
             }
+
+            $newobject->originalData = clone $newobject;
 
             $listobject[] = $newobject;
         }
@@ -537,7 +548,7 @@ class Eloquent
 
     /**
      * @param array $filter
-     * @return array App\Eloquent
+     * @return array
      * 
      * get all data result from table
      */
@@ -547,30 +558,30 @@ class Eloquent
         $this->setFilters($filter);
 
         $result = null;
-        $fields = []; 
+        $fields = [];
         $imploded = null;
         $results = null;
         $withRelated = null;
         if ($returnEntity) {
 
-            if(empty($columns)){
+            if (empty($columns)) {
                 $fields = static::getProperties();
                 $imploded = implode("," . $this->table . ".", $fields);
                 $results = $this->builder->select($this->table . "." . $imploded)->get()->getResult();
             } else {
                 $fields = $columns;
-                $imploded = implode("," , $fields);
+                $imploded = implode(",", $fields);
                 $results = $this->builder->select($imploded)->get()->getResult();
             }
 
-            if(!empty($this->relatedClass))
+            if (!empty($this->relatedClass))
                 $withRelated = $this->fetchRelatedData($results);
             // echo json_encode($withRelated);
             $result = $this->setToEntity($results, "entity", $withRelated);
         } else {
             $imploded = implode(",", $columns);
             $results = $this->builder->select($imploded)->get()->getResult();
-            if(!empty($this->relatedClass))
+            if (!empty($this->relatedClass))
                 $withRelated = $this->fetchRelatedData($results);
             $result = $this->setToEntity($results, "stdClass", $withRelated);
         }
@@ -584,13 +595,13 @@ class Eloquent
     /**
      * Eeager Load Query 
      */
-    public static function with($relatedClasses){
+    public static function with($relatedClasses)
+    {
         $instance = new static(static::$db);
-        foreach($relatedClasses as $relatedClass){
+        foreach ($relatedClasses as $relatedClass) {
             $instance->relatedClass[] = $relatedClass;
         }
         return $instance;
-        
     }
 
     /**
@@ -599,19 +610,20 @@ class Eloquent
      * @return array
      */
 
-    private function fetchRelatedData($results){
+    private function fetchRelatedData($results)
+    {
         $resultRelatedData = [];
         $collectionResult = new EloquentList($results);
         $fieldValues = null;
-        foreach($this->relatedClass as $related){
+        foreach ($this->relatedClass as $related) {
             $nameSpace = $related["Class"];
             $nameSpaceArr = explode("\\", $nameSpace);
             $className = $nameSpaceArr[count($nameSpaceArr) - 1];
-            $fieldValues = $collectionResult->chunkUnique( $related["ForeignKey"]);
+            $fieldValues = $collectionResult->chunkUnique($related["ForeignKey"]);
 
             $params = [
                 "whereIn" => [
-                    $nameSpace::$primaryKey => $fieldValues 
+                    $nameSpace::$primaryKey => $fieldValues
                 ]
             ];
 
@@ -621,7 +633,7 @@ class Eloquent
                 "ClassName" => $className,
                 "Data" => $fetchedData
             ];
-            $resultRelatedData[] = (object)$result;   
+            $resultRelatedData[] = (object)$result;
         }
         return $resultRelatedData;
     }
@@ -632,9 +644,10 @@ class Eloquent
      * @param array $filter
      * @return int
      */
-    public function countData(array $filter = []){
+    public function countData(array $filter = [])
+    {
         $this->setFilters($filter);
-        $result = $this->builder->selectCount($this->table . "." .static::$primaryKey)->get()->getResult();
+        $result = $this->builder->selectCount($this->table . "." . static::$primaryKey)->get()->getResult();
         return (int)$result[0]->{static::$primaryKey};
     }
 
@@ -683,8 +696,9 @@ class Eloquent
     public function save($isAutoIncrement = true)
     {
         $data = [];
-        if (!$this->isDirty())
+        if (!$this->isDirty()) {
             return true;
+        }
 
         $this->beforeSave();
         foreach ($this->fields as $field) {
@@ -718,7 +732,7 @@ class Eloquent
      */
     public function delete()
     {
-        if(empty($this->{static::$primaryKey}))
+        if (empty($this->{static::$primaryKey}))
             throw new DatabaseException("Couldn't Find Any Data To Delete");
 
         $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
@@ -998,5 +1012,80 @@ class Eloquent
     {
         $datatables = new EloquentDatatables($filter, $returnEntity, $useIndex, static::class);
         return $datatables;
+    }
+
+    /**
+     * Return data before it's modified
+     * @return static 
+     */
+    public function getOriginalData()
+    {
+        return $this->originalData;
+    }
+
+    /**
+     * Batch delete data from entity table with ids
+     * @return boolean
+     */
+    public static function batchDelete(array $ids)
+    {
+        $params = [
+            "whereIn" => [
+                static::$primaryKey => $ids
+            ]
+        ];
+
+        return static::remove($params);
+    }
+
+    /**
+     * Batch delete data from entity table with ids
+     * @return boolean
+     * @throws DatabaseException
+     */
+    public static function batchDeleteOrError(array $ids)
+    {
+        $params = [
+            "whereIn" => [
+                static::$primaryKey => $ids
+            ]
+        ];
+
+        if(static::remove($params))
+            return true;
+
+        throw new DatabaseException("Something went wrong while deleting the data");
+    }
+
+    /**
+     * Remove Data with condition
+     * @return boolean
+     */
+    public static function remove(array $params){
+        $instance = static::newInstance();
+        $instance->setFilters($params);
+        if($instance->builder->delete())
+            return true;
+        return false;
+
+    }
+
+    /**
+     * Remove Data with condition
+     * @return boolean
+     * @throws DatabaseException
+     */
+    public static function removeOrError(array $params){
+        if(static::remove($params))
+            return true;
+        throw new DatabaseException("Something went wrong while deleting the data");
+
+    }
+
+    /**
+     * new static instance
+     */
+    private static function newInstance(){
+        return new static(static::$db);
     }
 }

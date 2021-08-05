@@ -45,6 +45,9 @@ class EloquentPaging
 		}
 	}
 
+	/**
+	 * Create existed paramter on GET method
+	 */
 	private function createGetParam($params, $except = '')
 	{
 		if (! empty($except))
@@ -57,6 +60,9 @@ class EloquentPaging
 	}
 	
 
+	/**
+	 * Set Paging field
+	 */
 	private function setPaging()
 	{
 		$showedPage = $this->showedPage;
@@ -108,6 +114,10 @@ class EloquentPaging
 		}
 	}
 
+	/**
+	 * Set param before data is fetched
+	 * @return array
+	 */
 	public function setParams()
 	{
 		$params               = $this->filter;
@@ -119,6 +129,10 @@ class EloquentPaging
 		return $params;
 	}
 
+	/**
+	 * Fetch All Data
+	 * @return array
+	 */
 	public function fetch()
 	{
 		try
@@ -139,6 +153,11 @@ class EloquentPaging
 		return (object)$this->output;
 	}
 
+	/**
+	 * Get Count All Data
+	 * @param array $filter
+	 * @return int
+	 */
 	private function allData($filter = [])
 	{
 		$params = [
