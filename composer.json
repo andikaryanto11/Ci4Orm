@@ -6,7 +6,8 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": "^7.4"
+        "php": "^7.4",
+        "fzaninotto/faker": "1.9.2"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
