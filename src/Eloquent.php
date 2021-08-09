@@ -6,6 +6,7 @@ use AndikAryanto11\Exception\DatabaseException;
 use AndikAryanto11\Exception\EloquentException;
 use AndikAryanto11\Libraries\Cast;
 use AndikAryanto11\Libraries\EloquentDatatables;
+use AndikAryanto11\Libraries\EloquentFabricator;
 use AndikAryanto11\Libraries\EloquentList;
 use AndikAryanto11\Libraries\EloquentPaging;
 use CodeIgniter\Database\BaseConnection;
@@ -1051,7 +1052,7 @@ class Eloquent
             ]
         ];
 
-        if(static::remove($params))
+        if (static::remove($params))
             return true;
 
         throw new DatabaseException("Something went wrong while deleting the data");
@@ -1061,13 +1062,13 @@ class Eloquent
      * Remove Data with condition
      * @return boolean
      */
-    public static function remove(array $params){
+    public static function remove(array $params)
+    {
         $instance = static::newInstance();
         $instance->setFilters($params);
-        if($instance->builder->delete())
+        if ($instance->builder->delete())
             return true;
         return false;
-
     }
 
     /**
@@ -1075,17 +1076,39 @@ class Eloquent
      * @return boolean
      * @throws DatabaseException
      */
-    public static function removeOrError(array $params){
-        if(static::remove($params))
+    public static function removeOrError(array $params)
+    {
+        if (static::remove($params))
             return true;
         throw new DatabaseException("Something went wrong while deleting the data");
-
     }
 
     /**
      * new static instance
      */
-    private static function newInstance(){
+    private static function newInstance()
+    {
         return new static(static::$db);
+    }
+
+    /**
+     * Related to fabricate data, fields that is registered here wont be faked
+     * @return array
+     */
+    public static function unFabricateFields()
+    {
+        return [];
+    }
+
+    /**
+     * Set eloquent instance with fake data
+     * @param array $fakeFieldsFabracator
+     * @param array $except - Filed that wont be faked
+     * @return Eloquent
+     */
+    public static function fabricate(array $fakeFieldFabricator, array $except = [])
+    {
+        $exceptFields = !empty($except) ? $except : static::unFabricateFields();
+        return EloquentFabricator::assign(static::class, $fakeFieldFabricator, $exceptFields);
     }
 }
