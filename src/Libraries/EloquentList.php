@@ -83,8 +83,8 @@ class EloquentList extends Lists
             if (!property_exists($item, $columnName)) {
                 throw new ListException("Column '$columnName' is not found");
             }
-            if(!in_array($item->$columnName, $data))
-                $data[] = $item->$columnName;
+            if(!in_array($item->{"get$columnName"}(), $data))
+                $data[] = $item->{"get$columnName"}();
         }
         return $data;
     }
