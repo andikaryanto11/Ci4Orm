@@ -237,7 +237,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
         $data = static::find($id);
         if (empty($data))
             return static::newInstance();
-        return $data[0];
+        return $data;
     }
 
     /**
