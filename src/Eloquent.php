@@ -716,14 +716,17 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     public function delete()
     {
-        if (empty($this->{$this->getPrimaryKey()}))
+        $primaryKey = $this->getPrimaryKey();
+        $getprimaryKey = "get$primaryKey";
+        $setprimaryKey = "set$primaryKey";
+        if (empty($this->$getprimaryKey()))
             throw new DatabaseException("Couldn't Find Any Data To Delete");
 
-        $this->builder->where($this->getPrimaryKey(), $this->{$this->getPrimaryKey()});
+        $this->builder->where($this->getPrimaryKey(), $this->$getprimaryKey());
         if (!$this->builder->delete())
             return false;
 
-        $this->{$this->getPrimaryKey()} = null;
+        $this->$setprimaryKey(0);
         return true;
     }
 
