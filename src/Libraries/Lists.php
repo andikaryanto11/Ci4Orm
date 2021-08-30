@@ -20,6 +20,11 @@ class Lists implements IList
     {
     }
 
+    /**
+     * Filter item wit criteria
+     * @param Closure $callback 
+     * @return this
+     */
     public function filter($callback)
     {
         $newdata = [];
@@ -32,6 +37,11 @@ class Lists implements IList
         return $this;
     }
 
+    /**
+     * Filter item with where criteria
+     * @param Closure $callback 
+     * @return array
+     */
     public function where($callback)
     {
         $newdata = [];
@@ -43,6 +53,11 @@ class Lists implements IList
         return $newdata;
     }
 
+    /**
+     * Filter item with where criteria
+     * @param Closure $callback 
+     * @return mix
+     */
     public function whereOne($callback){
         $datas = $this->where($callback);
         if(!empty($datas))
@@ -50,12 +65,21 @@ class Lists implements IList
         return null;
     }
 
-    public function isEmpty()
+    /**
+     * Check if items empty
+     * @return bool
+     */
+    public function isEmpty(): bool
     {
         return empty($this->items);
     }
 
-    public function take($number)
+    /**
+     * Get data from item with from range
+     * @param int $number
+     * @return array
+     */
+    public function take($number): array
     {
         if ($number <= 0)
             throw new ListException("Number must be greater than 0 (zero)");
@@ -67,7 +91,12 @@ class Lists implements IList
         }
     }
 
-    public function index($callback){
+    /**
+     * Get index of item
+     * @param Closure $callback
+     * @return int
+     */
+    public function index($callback): int{
         $i = 0;
         foreach ($this->items as $item) {
             if ($callback($item)) {
@@ -80,6 +109,7 @@ class Lists implements IList
 
     /**
      * Get first element data
+     * @return 
      */
     public function first(){
         if(empty($this->items))
@@ -90,7 +120,7 @@ class Lists implements IList
 
     /**
      * Get all items
-     * 
+     * @return array 
      */
     public function getItems()
     {
@@ -118,6 +148,10 @@ class Lists implements IList
         return $this->items;
     }
 
+    /**
+     * get size of list
+     * @return int
+     */
     public function count()
     {
         return count($this->items);

@@ -2,25 +2,78 @@
 
 namespace AndikAryanto11\Libraries;
 
+use CodeIgniter\HTTP\IncomingRequest;
 use Exception;
 
 class EloquentDatatables
 {
+     /**
+      * @var IncomingRequest
+      */
      protected $request;
-     protected $filter     = false;
+
+     /**
+      * @var array
+      */
+     protected $filter     = [];
+
+     /**
+      * @var bool
+      */
      protected $useIndex   = true;
+
+     /**
+      * @var bool
+      */
      protected $isEloquent = false;
+     /**
+      * @var string Eloquent class
+      */
      protected $eloquent;
-     protected $table;
+
+     /**
+      * @var string
+      */
      protected $dtRowClass;
+
+     /**
+      * @var string
+      */
      protected $dtRowId;
+
+     /**
+      * @var int 
+      */
      protected $columnCounter  = 0;
+
+     /**
+      * @var array 
+      */
      protected $column         = [];
+
+     /**
+      * @var array 
+      */
      protected $dtTableColumns = [];
+
+     /**
+      * @var bool 
+      */
      protected $returnEntity   = false;
+
+     /**
+      * @var int 
+      */
      protected $currentPage    = null;
+
+     /**
+      * @var int 
+      */
      protected $pageSize       = null;
 
+     /**
+      * @var array 
+      */
      protected $output = [
           'draw'            => null,
           'recordsTotal'    => null,
@@ -165,17 +218,17 @@ class EloquentDatatables
 
      public function populate()
      {
-          // try {
-          $params = $this->setParams();
-          $result = $this->eloquent::findAll($params, $this->returnEntity, $this->getColumnsOnly());
+          try {
+               $params = $this->setParams();
+               $result = $this->eloquent::findAll($params, $this->returnEntity, $this->getColumnsOnly());
 
-          $this->output['draw']            = !empty($this->request->getPost('draw')) ? intval($this->request->getPost('draw')) : 0;
-          $this->output['recordsTotal']    = intval(count($result));
-          $this->output['recordsFiltered'] = intval($this->allData($params));
-          $this->output['data']            = $this->output($result);
-          // } catch (Exception $e) {
-          //      $this->output['error'] = $e->getMessage();
-          // }
+               $this->output['draw']            = !empty($this->request->getPost('draw')) ? intval($this->request->getPost('draw')) : 0;
+               $this->output['recordsTotal']    = intval(count($result));
+               $this->output['recordsFiltered'] = intval($this->allData($params));
+               $this->output['data']            = $this->output($result);
+          } catch (Exception $e) {
+               $this->output['error'] = $e->getMessage();
+          }
 
           return $this->output;
      }
@@ -286,8 +339,8 @@ class EloquentDatatables
 
      /**
       * Add row class name for datatable.net
+      * @param string $className
       */
-
      public function addDtRowClass($className)
      {
           $this->dtRowClass = $className;
@@ -296,6 +349,7 @@ class EloquentDatatables
 
      /**
       * Add row id name for datatable.net
+      * @param string $className
       */
      public function addDtRowId($columName)
      {
@@ -311,7 +365,7 @@ class EloquentDatatables
       */
      private function getColValue($column, $data)
      {
-          
+
           $col        = explode('.', $column['column']);
           $columnname = null;
           if (count($col) === 3) {
