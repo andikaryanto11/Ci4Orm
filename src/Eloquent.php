@@ -1074,4 +1074,11 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
         return $json;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function validate(){
+
+    }
 }

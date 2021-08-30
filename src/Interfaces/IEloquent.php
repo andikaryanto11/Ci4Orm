@@ -147,4 +147,9 @@ interface IEloquent {
      */
     public function getOriginalData();
 
+    /**
+     * Validate an Eloquent object
+     */
+    public function validate();
+
 }
