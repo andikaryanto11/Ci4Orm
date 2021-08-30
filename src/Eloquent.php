@@ -652,7 +652,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     private function insert($data)
     {
         if ($this->builder->set($data, true)->insert()) {
-            $this->{$this->getPrimaryKey()} = static::$db->insertID();
+            $primaryKey = "set".$this->getPrimaryKey();
+            $this->$primaryKey(static::$db->insertID());
             return true;
         }
 
@@ -665,7 +666,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     private function update($data)
     {
-        $this->builder->where($this->getPrimaryKey(), $this->{$this->getPrimaryKey()});
+        $getPrimaryKey = "get".$this->getPrimaryKey();
+        $this->builder->where($this->getPrimaryKey(), $this->$getPrimaryKey());
         if ($this->builder->update($data)) {
             return true;
         }
