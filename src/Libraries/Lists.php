@@ -23,7 +23,7 @@ class Lists implements IList
     /**
      * Filter item wit criteria
      * @param Closure $callback 
-     * @return this
+     * @return Lists
      */
     public function filter($callback)
     {
@@ -35,34 +35,6 @@ class Lists implements IList
         }
         $this->items = $newdata;
         return $this;
-    }
-
-    /**
-     * Filter item with where criteria
-     * @param Closure $callback 
-     * @return array
-     */
-    public function where($callback)
-    {
-        $newdata = [];
-        foreach ($this->items as $item) {
-            if ($callback($item)) {
-                $newdata[] = $item;
-            }
-        }
-        return $newdata;
-    }
-
-    /**
-     * Filter item with where criteria
-     * @param Closure $callback 
-     * @return mix
-     */
-    public function whereOne($callback){
-        $datas = $this->where($callback);
-        if(!empty($datas))
-            return $datas[0];
-        return null;
     }
 
     /**
