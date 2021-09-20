@@ -67,7 +67,7 @@ class EloquentList extends Lists
             if (!property_exists($item, $columnName)) {
                 throw new ListException("Column '$columnName' is not found");
             }
-            $data[] = $item->{"get$columnName()"};
+            $data[] = $item->{"get$columnName"}();
         }
         return $data;
     }
@@ -130,7 +130,7 @@ class EloquentList extends Lists
     public function sum($columnName){
         $total = 0;
         foreach($this->items as $item){
-            $total += $item->{"get$columnName()"};
+            $total += $item->{"get$columnName"}();
         }
         return $total;
     }
@@ -143,7 +143,7 @@ class EloquentList extends Lists
     public function avg($columnName){
         $total = 0;
         foreach($this->items as $item){
-            $total += $item->{"get$columnName()"};
+            $total += $item->{"get$columnName"}();
         }
         return $total / count($this->items);
     }
@@ -159,13 +159,13 @@ class EloquentList extends Lists
         foreach($this->items as $item){
             if(is_null($data)){
                 $data = $item;
-                $min = $item->{"get$columnName()"};
+                $min = $item->{"get$columnName"}();
                 continue;
             }
 
-            if($item->{"get$columnName()"} < $min){
+            if($item->{"get$columnName"}() < $min){
                 $data = $item;
-                $min = $item->{"get$columnName()"};
+                $min = $item->{"get$columnName"}();
             }
         }
         return $return == "model" ? $data : $min;
@@ -181,13 +181,13 @@ class EloquentList extends Lists
         foreach($this->items as $item){
             if(is_null($data)){
                 $data = $item;
-                $max = $item->{"get$columnName()"};
+                $max = $item->{"get$columnName"}();
                 continue;
             }
             
-            if($item->{"get$columnName()"} > $max){
+            if($item->{"get$columnName"}() > $max){
                 $data = $item;
-                $max = $item->{"get$columnName()"};
+                $max = $item->{"get$columnName"}();
             }
         }
         return $return == "model" ? $data : $max;
