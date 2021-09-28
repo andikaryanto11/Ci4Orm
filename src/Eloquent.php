@@ -652,11 +652,17 @@ class Eloquent
         return (int)$result[0]->{static::$primaryKey};
     }
 
-
     /**
      * will be executed before save function
      */
     public function beforeSave()
+    {
+    }
+
+    /**
+     * validate
+     */
+    public function validate()
     {
     }
 
