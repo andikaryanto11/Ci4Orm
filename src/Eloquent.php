@@ -645,6 +645,13 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     {
     }
 
+     /**
+     * Validate
+     */
+    public function validate()
+    {
+    }
+
     /**
      * @return bool
      * insert new data to table
