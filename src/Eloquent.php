@@ -646,6 +646,13 @@ class Eloquent
     {
     }
 
+     /**
+     * Validate
+     */
+    public function validate()
+    {
+    }
+
     /**
      * @return bool
      * insert new data to table
