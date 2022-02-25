@@ -2,7 +2,9 @@
 
 namespace Ci4Orm\Entity;
 
-abstract class Entity
+use Ci4Orm\Interfaces\IEntity;
+
+class Entity implements IEntity
 {
 
     /**
@@ -10,9 +12,5 @@ abstract class Entity
      */
     public function __construct()
     {
-    }
-
-    public static function getProps(){
-        
     }
 }
