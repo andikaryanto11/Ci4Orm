@@ -1,8 +1,8 @@
 <?php
 
-namespace AndikAryanto11\Libraries;
+namespace Ci4Orm\Libraries;
 
-use AndikAryanto11\Exception\ListException;
+use Ci4Orm\Exception\ListException;
 
 class EloquentList extends Lists
 {

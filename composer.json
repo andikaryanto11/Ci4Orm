@@ -13,7 +13,7 @@
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "AndikAryanto11\\": "src/"
+            "Ci4Orm\\": "src/"
         }
     }
     

@@ -1,5 +1,5 @@
 <?php 
-namespace AndikAryanto11\Exception;
+namespace Ci4Orm\Exception;
 
 use Exception;
 

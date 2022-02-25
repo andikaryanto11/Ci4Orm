@@ -1,9 +1,9 @@
 <?php
 
-namespace AndikAryanto11\Libraries;
+namespace Ci4Orm\Libraries;
 
-use AndikAryanto11\Exception\ListException;
-use AndikAryanto11\Interfaces\IList;
+use Ci4Orm\Exception\ListException;
+use Ci4Orm\Interfaces\IList;
 use ArrayIterator;
 
 class Lists implements IList

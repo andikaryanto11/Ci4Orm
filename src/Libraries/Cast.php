@@ -1,6 +1,6 @@
 <?php
 
-namespace AndikAryanto11\Libraries;
+namespace Ci4Orm\Libraries;
 
 class Cast
 {

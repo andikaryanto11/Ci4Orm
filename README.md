@@ -14,7 +14,7 @@ Inspired by .NET Enitity Framwork.
   - static $primaryKey = "your_primary_key_field_name" is mandatory property you have to set
 
         
-        use AndikAryanto11\Eloquent;
+        use Ci4Orm\Eloquent;
         class MyEloquent extends Eloquent{
 
           public $FieldInTable;

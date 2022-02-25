@@ -1,7 +1,7 @@
 <?php
-namespace AndikAryanto11\Interfaces;
+namespace Ci4Orm\Interfaces;
 
-use AndikAryanto11\Exception\DatabaseException;
+use Ci4Orm\Exception\DatabaseException;
 
 interface IEloquent {
 

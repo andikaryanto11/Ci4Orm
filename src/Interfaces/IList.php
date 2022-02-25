@@ -1,5 +1,5 @@
 <?php
-namespace AndikAryanto11\Interfaces;
+namespace Ci4Orm\Interfaces;
 
 use ArrayAccess;
 use Countable;

@@ -1,9 +1,9 @@
 <?php
 
-namespace AndikAryanto11\Libraries;
+namespace Ci4Orm\Libraries;
 
-use AndikAryanto11\Eloquent;
-use AndikAryanto11\Exception\FabricatorException;
+use Ci4Orm\Eloquent;
+use Ci4Orm\Exception\FabricatorException;
 use Exception;
 use Faker\Factory;
 use JsonSerializable;

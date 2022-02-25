@@ -1,16 +1,16 @@
 <?php
 
-namespace AndikAryanto11;
+namespace Ci4Orm;
 
-use AndikAryanto11\Exception\DatabaseException;
-use AndikAryanto11\Exception\EloquentException;
-use AndikAryanto11\Interfaces\IDbTable;
-use AndikAryanto11\Interfaces\IEloquent;
-use AndikAryanto11\Libraries\Cast;
-use AndikAryanto11\Libraries\EloquentDatatables;
-use AndikAryanto11\Libraries\EloquentFabricator;
-use AndikAryanto11\Libraries\EloquentList;
-use AndikAryanto11\Libraries\EloquentPaging;
+use Ci4Orm\Exception\DatabaseException;
+use Ci4Orm\Exception\EloquentException;
+use Ci4Orm\Interfaces\IDbTable;
+use Ci4Orm\Interfaces\IEloquent;
+use Ci4Orm\Libraries\Cast;
+use Ci4Orm\Libraries\EloquentDatatables;
+use Ci4Orm\Libraries\EloquentFabricator;
+use Ci4Orm\Libraries\EloquentList;
+use Ci4Orm\Libraries\EloquentPaging;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\BaseConnection;
 use JsonSerializable;
