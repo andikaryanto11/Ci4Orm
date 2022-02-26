@@ -1,7 +1,7 @@
 <?php
 namespace Ci4Orm\Repository;
 
-use Ci4Orm\Entity\Entity;
+use AndikAryanto11\Libraries\Lists;
 use Ci4Orm\Entity\ORM;
 use CodeIgniter\Database\BaseBuilder;
 use DateTime;
@@ -43,6 +43,17 @@ class Repository {
 		$this->selectColumns = ORM::getSelectColumns($this->entityClass);
 	}
 
+	/**
+	 * Create new instance of class
+	 *
+	 * @return IEntity;
+	 */
+	public function newEntity(){
+		$newEntity = new $this->entityClass;
+		$primaryKey = 'set' . $this->props['primaryKey'];
+		$newEntity->$primaryKey(0);
+		return $newEntity;
+	}
 
 	/**
 	 *
@@ -235,24 +246,37 @@ class Repository {
         foreach($results as $result) {
             $obj = new $this->entityClass;
             foreach($this->props['props'] as $key => $value) {
-				$method = 'set'.$key;
-                if (!$value['isEntity']) {
-					if($value['type'] != 'datetime') {
-                    	$obj->$method($result->$key);
+				if(!is_null($result->$key)){
+					$method = 'set'.$key;
+					if (!$value['isEntity']) {
+						if($value['type'] != 'datetime') {
+							$obj->$method($result->$key);
+						} else {
+							$newDate = new DateTime($result->$key);
+							$obj->$method($newDate);
+						}
 					} else {
-						$newDate = new DateTime($result->$key);
-                    	$obj->$method($newDate);
+						$instanceRelatedClass = new self($value['type']);
+						$foreignKey = $value['foreignKey'];
+						$instance = $instanceRelatedClass->find($result->$foreignKey);
+						$obj->$method($instance);
 					}
-                } else {
-                    $instanceRelatedClass = new self($value['type']);
-					$foreignKey = $value['foreignKey'];
-                    $instance = $instanceRelatedClass->find($result->$foreignKey);
-                    $obj->$method($instance);
-                }
+				}
             }
             $objects[] = $obj;
         }
         return $objects;
+    }
+
+	/**
+     * Get all data result from table
+     * @param array $filter
+     * @return Lists
+     */
+    public function collect(array $filter = [])
+    {
+        $result = $this->findAll($filter);
+        return new Lists($result);
     }
 
 }

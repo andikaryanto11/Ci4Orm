@@ -20,13 +20,13 @@ use stdClass;
 
 /**
  * Class Eloquent
- * 
+ *
  * Eloquent make getting data from database more usefull.
  * It will get data and the related table data with easy function
- * 
- * 
+ *
+ *
  * @package CodeIgniter
- * 
+ *
  */
 abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 {
@@ -40,7 +40,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
     /**
      * Database Builder
-     * 
+     *
      * @var BaseBuilder
      */
     private BaseBuilder $builder;
@@ -63,7 +63,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
     /**
      * @param $db is \Config\Database::connect();
-     * 
+     *
      */
 
     /**
@@ -77,8 +77,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     private $escapeToOutput = true;
 
     /**
-     * Hide field value for some field(s), data will be set to null 
-     * 
+     * Hide field value for some field(s), data will be set to null
+     *
      */
     private $hideFieldValue = [];
 
@@ -189,7 +189,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * @param array $filter
      * @return int
-     * 
+     *
      * Count All data
      */
     public static function count(array $filter, $returnEntity = true)
@@ -205,8 +205,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * @param int $id
      * @return App\Eloquents|null
-     * 
-     * 
+     *
+     *
      * get data from table by Id
      */
     public static function find($id)
@@ -228,7 +228,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * @param int $id
      * @return App\Eloquents
-     * 
+     *
      * get data from table by Id or return new object
      */
 
@@ -244,7 +244,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      * @param int $id
      * @return App\Eloquents
      * @throws DbException
-     * 
+     *
      * get data from table by Id or return throw error
      */
     public static function findOrFail($id)
@@ -260,8 +260,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * @param array $filter
      * @return App\Eloquent
-     * 
-     * get first data of result from table   
+     *
+     * get first data of result from table
      */
     public static function findOne(array $filter = [])
     {
@@ -275,8 +275,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * @param array $filter
      * @return App\Eloquent
-     * 
-     * get first data of result from table   
+     *
+     * get first data of result from table
      */
     public static function findOneOrNew(array $filter = [])
     {
@@ -290,9 +290,9 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * @param array $filter
      * @return App\Eloquent
-     * 
-     * get first data of result from table or throw error  
-     * 
+     *
+     * get first data of result from table or throw error
+     *
      */
     public static function findOneOrFail(array $filter = [])
     {
@@ -306,7 +306,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * @param array $filter
      * @return mixed array App\Eloquent | this
-     * 
+     *
      * get all data result from table
      */
     public static function findAll(array $filter = [], $returnEntity = true, $columns = [])
@@ -324,7 +324,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * @param array $filter
      * @return array App\Eloquent
-     * 
+     *
      * get all data result from table or throw error
      */
     public static function findAllOrFail(array $filter = [], $returnEntity = true, $columns = [])
@@ -418,7 +418,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
     /**
      * set filter to query builder
-     * 
+     *
      * @param array $filter
      */
 
@@ -579,7 +579,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * Eeager Load Query 
+     * Eeager Load Query
      */
     public static function with($relatedClasses)
     {
@@ -917,9 +917,9 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
     /**
      * get all data result from table
-     * @param array $filter 
+     * @param array $filter
      * @return EloquentList
-     * 
+     *
      */
     public static function collect(array $filter = [])
     {
@@ -936,7 +936,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      * @param int $shoedPage
      * @param array $queryParams wil be generated as query params
      * @return EloquentList
-     * 
+     *
      */
     public static function paging($filter = [], $page = 1, $size = 6, $showedPage = 5, $queryParams = [])
     {
@@ -948,10 +948,10 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     /**
      * Get datatables server side  results array
      * @param array $filter
-     * @param boolean $returnEntity set to true array data will contain entity of class which call this function 
+     * @param boolean $returnEntity set to true array data will contain entity of class which call this function
      * @param boolean $useIndex set to false if datatables in front end use column name
      * @return EloquentDatatables
-     * 
+     *
      */
     public static function datatables($filter = [], $returnEntity = true, $useIndex = true)
     {
