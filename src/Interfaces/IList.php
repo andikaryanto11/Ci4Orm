@@ -7,5 +7,11 @@ use IteratorAggregate;
 use JsonSerializable;
 
 interface IList extends IteratorAggregate, JsonSerializable, Countable {
-    
+
+	/**
+	 * Count element
+	 *
+	 * @return int
+	 */
+	public function getSize();
 }

@@ -5,6 +5,7 @@ namespace Ci4Orm\Libraries;
 use Ci4Orm\Exception\ListException;
 use Ci4Orm\Interfaces\IList;
 use ArrayIterator;
+use Traversable;
 
 class Lists implements IList
 {
@@ -22,7 +23,7 @@ class Lists implements IList
 
     /**
      * Filter item wit criteria
-     * @param Closure $callback 
+     * @param Closure $callback
      * @return Lists
      */
     public function filter($callback)
@@ -81,7 +82,7 @@ class Lists implements IList
 
     /**
      * Get first element data
-     * @return 
+     * @return
      */
     public function first(){
         if(empty($this->items))
@@ -92,7 +93,7 @@ class Lists implements IList
 
     /**
      * Get all items
-     * @return array 
+     * @return array
      */
     public function getItems()
     {
@@ -109,9 +110,12 @@ class Lists implements IList
         return end($this->items);
     }
 
-    public function getIterator()
+	/**
+	 *
+	 * @inh
+	 */
+    public function getIterator(): Traversable
     {
-
         return new ArrayIterator($this->items);
     }
 
@@ -124,7 +128,7 @@ class Lists implements IList
      * get size of list
      * @return int
      */
-    public function count()
+    public function getSize()
     {
         return count($this->items);
     }

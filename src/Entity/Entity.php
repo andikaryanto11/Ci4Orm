@@ -12,5 +12,6 @@ class Entity implements IEntity
      */
     public function __construct()
     {
+		
     }
 }

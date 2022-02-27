@@ -52,19 +52,9 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     private array $fields;
 
     /**
-     * Primary Key Field;
-     */
-    private $primaryKey;
-
-    /**
      * filter params;
      */
     private $filter;
-
-    /**
-     * @param $db is \Config\Database::connect();
-     *
-     */
 
     /**
      * Default data to output is escaped, set this field to non escape field
@@ -102,11 +92,6 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     private $originalData;
 
 
-    /**
-     * table name
-     */
-
-    private $table;
 
     public function __construct(&$db)
     {
