@@ -133,4 +133,11 @@ class Lists implements IList
         return count($this->items);
     }
 
+	/**
+	 * @return int
+	 */
+	public function count(): int {
+		return count($this->items);
+	}
+
 }

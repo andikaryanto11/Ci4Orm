@@ -4,14 +4,19 @@ namespace Ci4Orm\Repository;
 
 use Ci4Orm\Entity\ORM;
 use Ci4Orm\Exception\EntityException;
+use Ci4Orm\Interfaces\IEntity;
 use Ci4Orm\Interfaces\IRepository;
 use Ci4Orm\Libraries\Datatables;
 use Ci4Orm\Libraries\Lists;
 use CodeIgniter\Database\BaseBuilder;
+use CodeIgniter\Database\BaseConnection;
 use DateTime;
 
 class Repository implements IRepository
 {
+
+	const SINGLE_RESULT_METHOD = 'single';
+	const PLURAL_RESULT_METHOD = 'plural';
 
 	/**
 	 *
@@ -39,14 +44,36 @@ class Repository implements IRepository
 
 	/**
 	 *
+	 * @var ?IEntity
+	 */
+
+	protected int $level;
+
+	protected RepositoryQueryCollector $repositoryQueryCollector;
+
+	protected BaseConnection $db;
+
+	/**
+	 *
 	 * @param string $entityClass
 	 */
-	public function __construct(string $entityClass)
-	{
+	public function __construct(
+		string $entityClass,
+		int $level = 0
+
+	) {
+		$this->level = $level;
 		$this->entityClass = $entityClass;
 		$this->props = ORM::getProps($this->entityClass);
-		$this->builder = \Config\Database::connect()->table($this->props['table']);
+		$this->db = \Config\Database::connect();
+		$this->builder = $this->db->table($this->props['table']);
 		$this->selectColumns = ORM::getSelectColumns($this->entityClass);
+		$this->repositoryQueryCollector = RepositoryQueryCollector::getInstance();
+	}
+
+	public function getProps()
+	{
+		return $this->props;
 	}
 
 	/**
@@ -60,6 +87,10 @@ class Repository implements IRepository
 		$primaryKey = 'set' . $this->props['primaryKey'];
 		$newEntity->$primaryKey(0);
 		return $newEntity;
+	}
+
+	public function getLevel(){
+		return $this->level;
 	}
 
 	/**
@@ -288,6 +319,10 @@ class Repository implements IRepository
 	public function fetch(array $filter = [], $columns = [])
 	{
 
+		// if($this->level == 5){
+		// 	return [];
+		// }
+
 		$this->setFilters($filter);
 
 		$result = null;
@@ -318,28 +353,66 @@ class Repository implements IRepository
 	private function setToEntity($results)
 	{
 		$objects = [];
-		foreach ($results as $result) {
+		foreach ($results as $key => $result) {
 			$obj = new $this->entityClass;
+
+			if($this->level == 0){
+				$primaryKey = $this->getProps()['primaryKey'];
+				$queryKey = $this->getProps()['table'] . '~' .
+					$primaryKey . '~' .
+					$result->$primaryKey;
+				$this->repositoryQueryCollector->addQueryAndResult($queryKey, $obj);
+			}
+
 			foreach ($this->props['props'] as $key => $value) {
-				if (!is_null($result->$key)) {
-					$method = 'set' . $key;
-					if (!$value['isEntity']) {
-						if ($value['type'] != 'datetime') {
+				// if (!is_null($result->$key)) {
+				$method = 'set' . $key;
+				if (!$value['isEntity']) {
+					if (!is_null($result->$key)) {
+						if ($value['type'] != 'DateTime') {
+							if($value['type'] == 'boolean')
+								$obj->$method((bool)$result->$key);
+
 							$obj->$method($result->$key);
 						} else {
 							$newDate = new DateTime($result->$key);
 							$obj->$method($newDate);
 						}
-					} else {
-						$instanceRelatedClass = new self($value['type']);
-						$foreignKey = $value['foreignKey'];
-						$instance = $instanceRelatedClass->find($result->$foreignKey);
-						$obj->$method($instance);
 					}
+				}
+				else {
+					if (isset($value['foreignKey'])) {
+						$foreignKey = $value['foreignKey'];
+						if (!is_null($result->$foreignKey)) {
+							$obj->constraints[$value['foreignKey']] = $result->$foreignKey;
+							// $instanceRelatedClass = new self($value['type'], $this->level + 1);
+
+							// if($instanceRelatedClass->getLevel() < 5){
+							// 	$instance = null;
+							// 	$queryKey = $instanceRelatedClass->getProps()['table'] . '~' .
+							// 		$instanceRelatedClass->getProps()['primaryKey'] . '~' .
+							// 		$result->$foreignKey;
+							// 	$queryData = $this->repositoryQueryCollector->getQuery($queryKey);
+							// 	if(empty($queryData))
+							// 		$instance = $instanceRelatedClass->find($result->$foreignKey);
+							// 	else
+							// 		$instance = $queryData;
+
+							// 	$this->repositoryQueryCollector->addQueryAndResult($queryKey, $instance);
+							// 	$obj->$method($instance);
+							// }
+						}
+					}
+
 				}
 			}
 			$objects[] = $obj;
 		}
+
+		if ($this->level == 0) {
+			$this->repositoryQueryCollector->clean();
+		}
+
 		return $objects;
 	}
 
