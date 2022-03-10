@@ -2,21 +2,18 @@
 
 namespace Ci4Orm\Repository;
 
-use Ci4Orm\Entity\ORM;
+use Ci4Orm\Entities\EntityList;
+use Ci4Orm\Entities\ORM;
 use Ci4Orm\Exception\EntityException;
 use Ci4Orm\Interfaces\IEntity;
 use Ci4Orm\Interfaces\IRepository;
 use Ci4Orm\Libraries\Datatables;
-use Ci4Orm\Libraries\Lists;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\BaseConnection;
 use DateTime;
 
 class Repository implements IRepository
 {
-
-	const SINGLE_RESULT_METHOD = 'single';
-	const PLURAL_RESULT_METHOD = 'plural';
 
 	/**
 	 *
@@ -47,10 +44,6 @@ class Repository implements IRepository
 	 * @var ?IEntity
 	 */
 
-	protected int $level;
-
-	protected RepositoryQueryCollector $repositoryQueryCollector;
-
 	protected BaseConnection $db;
 
 	/**
@@ -58,17 +51,14 @@ class Repository implements IRepository
 	 * @param string $entityClass
 	 */
 	public function __construct(
-		string $entityClass,
-		int $level = 0
+		string $entityClass
 
 	) {
-		$this->level = $level;
 		$this->entityClass = $entityClass;
 		$this->props = ORM::getProps($this->entityClass);
 		$this->db = \Config\Database::connect();
 		$this->builder = $this->db->table($this->props['table']);
 		$this->selectColumns = ORM::getSelectColumns($this->entityClass);
-		$this->repositoryQueryCollector = RepositoryQueryCollector::getInstance();
 	}
 
 	public function getProps()
@@ -87,10 +77,6 @@ class Repository implements IRepository
 		$primaryKey = 'set' . $this->props['primaryKey'];
 		$newEntity->$primaryKey(0);
 		return $newEntity;
-	}
-
-	public function getLevel(){
-		return $this->level;
 	}
 
 	/**
@@ -316,12 +302,8 @@ class Repository implements IRepository
 	 * @param array $columns
 	 * @return array
 	 */
-	public function fetch(array $filter = [], $columns = [])
+	private function fetch(array $filter = [], $columns = [], &$associated = [])
 	{
-
-		// if($this->level == 5){
-		// 	return [];
-		// }
 
 		$this->setFilters($filter);
 
@@ -339,7 +321,7 @@ class Repository implements IRepository
 			$results = $this->builder->select($imploded)->get()->getResult();
 		}
 
-		$result = $this->setToEntity($results);
+		$result = $this->setToEntity($results, $associated);
 
 		return $result;
 	}
@@ -350,19 +332,11 @@ class Repository implements IRepository
 	 * @param stdClass[] $results
 	 * @return array;
 	 */
-	private function setToEntity($results)
+	private function setToEntity($results, &$associated = [])
 	{
 		$objects = [];
 		foreach ($results as $key => $result) {
 			$obj = new $this->entityClass;
-
-			if($this->level == 0){
-				$primaryKey = $this->getProps()['primaryKey'];
-				$queryKey = $this->getProps()['table'] . '~' .
-					$primaryKey . '~' .
-					$result->$primaryKey;
-				$this->repositoryQueryCollector->addQueryAndResult($queryKey, $obj);
-			}
 
 			foreach ($this->props['props'] as $key => $value) {
 				// if (!is_null($result->$key)) {
@@ -384,6 +358,7 @@ class Repository implements IRepository
 					if (isset($value['foreignKey'])) {
 						$foreignKey = $value['foreignKey'];
 						if (!is_null($result->$foreignKey)) {
+							$associated[$value['foreignKey']][] = $result->$foreignKey;
 							$obj->constraints[$value['foreignKey']] = $result->$foreignKey;
 							// $instanceRelatedClass = new self($value['type'], $this->level + 1);
 
@@ -409,9 +384,12 @@ class Repository implements IRepository
 			$objects[] = $obj;
 		}
 
-		if ($this->level == 0) {
-			$this->repositoryQueryCollector->clean();
+		$newAssociated = [];
+		foreach($associated as $key => $value){
+			$newAssociated[$key] = array_unique($associated[$key]);
 		}
+
+		$associated = $newAssociated;
 
 		return $objects;
 	}
@@ -421,8 +399,11 @@ class Repository implements IRepository
 	 */
 	public function collect($filter = [])
 	{
-		$result = $this->findAll($filter);
-		return new Lists($result);
+		$associated = [];
+		$result = $this->fetch($filter, [] , $associated);
+		$entityList = new EntityList($result);
+		$entityList->setAssociatedKey($associated);
+		return $entityList;
 	}
 
 	/**

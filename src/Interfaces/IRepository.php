@@ -3,6 +3,7 @@
 namespace Ci4Orm\Interfaces;
 
 use AndikAryanto11\Libraries\Lists;
+use Ci4Orm\Entities\EntityList;
 use Ci4Orm\Exception\DatabaseException;
 use Ci4Orm\Exception\EntityException;
 use Ci4Orm\Libraries\Datatables;
@@ -72,7 +73,7 @@ interface IRepository
      * Colect data by filter
      *
      * @param  array $filter
-     * @return  Lists
+     * @return  EntityList
      */
     public function collect($filter = []);
 

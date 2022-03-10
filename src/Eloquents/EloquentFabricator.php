@@ -1,6 +1,6 @@
 <?php
 
-namespace Ci4Orm\Libraries;
+namespace Ci4Orm\Eloquents;
 
 use Ci4Orm\Eloquent;
 use Ci4Orm\Exception\FabricatorException;

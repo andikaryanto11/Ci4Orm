@@ -1,8 +1,9 @@
 <?php
 
-namespace Ci4Orm\Libraries;
+namespace Ci4Orm\Eloquents;
 
 use Ci4Orm\Exception\ListException;
+use Ci4Orm\Libraries\Lists;
 
 class EloquentList extends Lists
 {
@@ -32,7 +33,7 @@ class EloquentList extends Lists
 
     /**
      * Find Data with id
-     * 
+     *
      */
     public function find($id)
     {
@@ -43,7 +44,7 @@ class EloquentList extends Lists
 
     /**
      * Find data except id
-     * 
+     *
      */
     public function except(array $ids)
     {
@@ -67,7 +68,7 @@ class EloquentList extends Lists
             if (!property_exists($item, $columnName)) {
                 throw new ListException("Column '$columnName' is not found");
             }
-            $data[] = $item->{"get$columnName"}();
+            $data[] = $item->$columnName();
         }
         return $data;
     }
@@ -83,8 +84,8 @@ class EloquentList extends Lists
             if (!property_exists($item, $columnName)) {
                 throw new ListException("Column '$columnName' is not found");
             }
-            if(!in_array($item->{"get$columnName"}(), $data))
-                $data[] = $item->{"get$columnName"}();
+            if(!in_array($item->$columnName(), $data))
+                $data[] = $item->$columnName();
         }
         return $data;
     }
@@ -102,7 +103,7 @@ class EloquentList extends Lists
 
     /**
      * Get eloquent unsaved data means Id of eloquent is null
-     * 
+     *
      */
     public function unSaved()
     {
@@ -113,7 +114,7 @@ class EloquentList extends Lists
 
     /**
      * Get eloquent saved data means Id of eloquent is not null
-     * 
+     *
      */
     public function saved()
     {
@@ -125,12 +126,12 @@ class EloquentList extends Lists
     /**
      * Sum value of field
      * @param string $columnName
-     * 
+     *
      */
     public function sum($columnName){
         $total = 0;
         foreach($this->items as $item){
-            $total += $item->{"get$columnName"}();
+            $total += $item->$columnName();
         }
         return $total;
     }
@@ -138,12 +139,12 @@ class EloquentList extends Lists
     /**
      * Average value of field
      * @param string $columnName
-     * 
+     *
      */
     public function avg($columnName){
         $total = 0;
         foreach($this->items as $item){
-            $total += $item->{"get$columnName"}();
+            $total += $item->$columnName();
         }
         return $total / count($this->items);
     }
@@ -159,13 +160,13 @@ class EloquentList extends Lists
         foreach($this->items as $item){
             if(is_null($data)){
                 $data = $item;
-                $min = $item->{"get$columnName"}();
+                $min = $item->$columnName();
                 continue;
             }
 
-            if($item->{"get$columnName"}() < $min){
+            if($item->$columnName() < $min){
                 $data = $item;
-                $min = $item->{"get$columnName"}();
+                $min = $item->$columnName();
             }
         }
         return $return == "model" ? $data : $min;
@@ -181,13 +182,13 @@ class EloquentList extends Lists
         foreach($this->items as $item){
             if(is_null($data)){
                 $data = $item;
-                $max = $item->{"get$columnName"}();
+                $max = $item->$columnName();
                 continue;
             }
-            
-            if($item->{"get$columnName"}() > $max){
+
+            if($item->$columnName() > $max){
                 $data = $item;
-                $max = $item->{"get$columnName"}();
+                $max = $item->$columnName();
             }
         }
         return $return == "model" ? $data : $max;

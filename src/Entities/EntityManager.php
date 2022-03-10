@@ -1,5 +1,5 @@
 <?php
-namespace Ci4Orm\Entity;
+namespace Ci4Orm\Entities;
 
 use Ci4Orm\Interfaces\IEntity;
 use CodeIgniter\Database\BaseBuilder;

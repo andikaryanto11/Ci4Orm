@@ -1,6 +1,6 @@
 <?php
 
-namespace Ci4Orm\Entity;
+namespace Ci4Orm\Entities;
 
 class EntityConstraint {
 

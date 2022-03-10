@@ -4,18 +4,14 @@ namespace Ci4Orm;
 
 use Ci4Orm\Exception\DatabaseException;
 use Ci4Orm\Exception\EloquentException;
-use Ci4Orm\Interfaces\IDbTable;
-use Ci4Orm\Interfaces\IEloquent;
 use Ci4Orm\Libraries\Cast;
-use Ci4Orm\Libraries\EloquentDatatables;
-use Ci4Orm\Libraries\EloquentFabricator;
-use Ci4Orm\Libraries\EloquentList;
-use Ci4Orm\Libraries\EloquentPaging;
-use CodeIgniter\Database\BaseBuilder;
+use Ci4Orm\Eloquents\EloquentDatatables;
+use Ci4Orm\Eloquents\EloquentFabricator;
+use Ci4Orm\Eloquents\EloquentList;
+use Ci4Orm\Eloquents\EloquentPaging;
 use CodeIgniter\Database\BaseConnection;
-use JsonSerializable;
+use Exception;
 use ReflectionClass;
-use ReflectionProperty;
 use stdClass;
 
 /**
@@ -28,7 +24,7 @@ use stdClass;
  * @package CodeIgniter
  *
  */
-abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
+class Eloquent
 {
 
     /**
@@ -36,41 +32,50 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      *
      * @var BaseConnection
      */
-    private static ?BaseConnection $db = null;
+    protected static $db;
 
     /**
      * Database Builder
      *
      * @var BaseBuilder
      */
-    private BaseBuilder $builder;
+    protected $builder;
 
     /**
      * Field Exist On Intended Table
-     * @var array
      */
-    private array $fields;
+    protected $fields;
+
+    /**
+     * Primary Key Field;
+     */
+    static $primaryKey;
 
     /**
      * filter params;
      */
-    private $filter;
+    protected $filter;
+
+    /**
+     * @param $db is \Config\Database::connect();
+     *
+     */
 
     /**
      * Default data to output is escaped, set this field to non escape field
      */
-    private $nonEscapedField = [];
+    protected $nonEscapedField = [];
 
     /**
      * Data will be escaped if set to true
      */
-    private $escapeToOutput = true;
+    protected $escapeToOutput = true;
 
     /**
      * Hide field value for some field(s), data will be set to null
      *
      */
-    private $hideFieldValue = [];
+    protected $hideFieldValue = [];
 
     /**
      * Cast field to intended value,
@@ -78,7 +83,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      *      "Field" => Cast::BOOLEAN
      * ]
      */
-    private $cast = [];
+    protected $cast = [];
 
     /**
      * Eager Load related classes
@@ -91,53 +96,58 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
     private $originalData;
 
-
-
     public function __construct(&$db)
     {
+        if (!property_exists(get_class($this), 'table')) {
+            throw EloquentException::forNoTableName(get_class($this));
+        }
         helper('inflector');
         self::$db = $db;
         $this->builder = self::$db->table($this->getTableName());
-        $this->fields = $this->getProperties();
+        $this->fields = static::getProperties();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getTableName()
     {
-        return null;
-    }
-
-
-    /**
-     * @inheritdoc
-     */
-    public function getPrimaryKey()
-    {
-        return null;
+        return $this->table;
     }
 
     /**
      * get columns of table
      */
-    public function getProperties()
+    public static function getProperties()
     {
         $class = new ReflectionClass(static::class);
-        $props = $class->getProperties(ReflectionProperty::IS_PROTECTED);
+        $props = $class->getDefaultProperties();
+        unset($props['primaryKey']);
+        unset($props['db']);
+        unset($props['table']);
+        unset($props['hideFieldValue']);
+        unset($props['dbs']);
+        unset($props['validation']);
+        unset($props['request']);
+        unset($props['builder']);
+        unset($props['fields']);
+        unset($props['filter']);
+        unset($props['nonEscapedField']);
+        unset($props['escapeToOutput']);
+        unset($props['cast']);
+        unset($props['originalData']);
         $newProps = [];
         foreach ($props as $key => $value) {
-            $newProps[] = $value->name;
+            $newProps[] = $key;
         }
         return $newProps;
     }
 
     /**
-     * @inheritdoc
+     * Check if intance has changed value from orginal daata
+     *
+     * @return boolean
      */
     public function isDirty()
     {
-        if (empty($this->{$this->getPrimaryKey()}))
+        if (empty($this->{static::$primaryKey}))
             return true;
 
         $clonedData = $this->getOriginalData();
@@ -156,7 +166,10 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * @param array $filter
+     * @return bool
+     *
+     * check if data exist
      */
     public function isDataExist(array $filter)
     {
@@ -182,7 +195,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
         // $data = static::findAll($filter, $returnEntity);
 
-        $entity = static::newInstance();
+        $entity = new static(self::$db);
         return $entity->countData($filter);
         // return count($data);
     }
@@ -191,19 +204,16 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      * @param int $id
      * @return App\Eloquents|null
      *
-     *
      * get data from table by Id
      */
     public static function find($id)
     {
-        $instance = static::newInstance();
-        $params = [
+        $where = [
             'where' => [
-                $instance->getPrimaryKey() => $id
+                static::$primaryKey => $id
             ]
         ];
-
-        $data = $instance->fetch($params);
+        $data = static::findAll($where);
         if (count($data) > 0) {
             return $data[0];
         }
@@ -219,10 +229,16 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
     public static function findOrNew($id)
     {
-        $data = static::find($id);
+
+        $where = [
+            'where' => [
+                static::$primaryKey => $id
+            ]
+        ];
+        $data = static::findAll($where);
         if (empty($data))
-            return static::newInstance();
-        return $data;
+            return new static(self::$db);
+        return $data[0];
     }
 
     /**
@@ -234,8 +250,13 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     public static function findOrFail($id)
     {
-        $data = static::find($id);
-        if (is_null($data))
+        $where = [
+            'where' => [
+                static::$primaryKey => $id
+            ]
+        ];
+        $data = static::findAll($where);
+        if (count($data) == 0)
             throw new DatabaseException("Cannot find data with id:$id");
         return $data[0];
     }
@@ -268,7 +289,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
         $data = static::findAll($filter);
         if (empty($data))
-            return static::newInstance();
+            return new static(self::$db);
         return $data[0];
     }
 
@@ -294,10 +315,12 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      *
      * get all data result from table
      */
-    public static function findAll(array $filter = [], $returnEntity = true, $columns = [])
+    public static function findAll(array $filter = [], $returnEntity = true, $columns = [], $chunked = false)
     {
-        $entity = static::newInstance();
+        $entity = new static(self::$db);
         $entity->filter = $filter;
+        if ($chunked)
+            return $entity;
 
         $result = $entity->fetch($filter, $returnEntity,  $columns);
         if (count($result) > 0) {
@@ -314,7 +337,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     public static function findAllOrFail(array $filter = [], $returnEntity = true, $columns = [])
     {
-        $entity = static::newInstance();
+        $entity = new static(self::$db);
         $result = $entity->fetch($filter, $returnEntity,  $columns);
         if (count($result) > 0) {
             return $result;
@@ -323,7 +346,10 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * @param array $columnName
+     * @return array Of specific column data
+     *
+     * get all column data
      */
     public function chunk($columnName)
     {
@@ -407,7 +433,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      * @param array $filter
      */
 
-    private function setFilters($filter = [])
+    public function setFilters($filter = [])
     {
 
         if (!empty($filter)) {
@@ -522,7 +548,10 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
 
     /**
-     * @inheritdoc
+     * @param array $filter
+     * @return array
+     *
+     * get all data result from table
      */
     public function fetch(array $filter = [], $returnEntity = true, $columns = [])
     {
@@ -538,8 +567,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
             if (empty($columns)) {
                 $fields = static::getProperties();
-                $imploded = implode(", " . $this->getTableName() . ".", $fields);
-                $results = $this->builder->select($this->getTableName() . "." . $imploded)->get()->getResult();
+                $imploded = implode("," . $this->table . ".", $fields);
+                $results = $this->builder->select($this->table . "." . $imploded)->get()->getResult();
             } else {
                 $fields = $columns;
                 $imploded = implode(",", $fields);
@@ -548,7 +577,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
             if (!empty($this->relatedClass))
                 $withRelated = $this->fetchRelatedData($results);
-
+            // echo json_encode($withRelated);
             $result = $this->setToEntity($results, "entity", $withRelated);
         } else {
             $imploded = implode(",", $columns);
@@ -559,7 +588,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
         }
 
         // $result[] = self::$db->getLastQuery()->getQuery();
-        // echo json_encode($imploded);
+
+        // echo json_encode($result);
         return $result;
     }
 
@@ -568,7 +598,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     public static function with($relatedClasses)
     {
-        $instance = static::newInstance();
+        $instance = new static(static::$db);
         foreach ($relatedClasses as $relatedClass) {
             $instance->relatedClass[] = $relatedClass;
         }
@@ -615,18 +645,24 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      * @param array $filter
      * @return int
      */
-    private function countData(array $filter = [])
+    public function countData(array $filter = [])
     {
         $this->setFilters($filter);
-        $result = $this->builder->selectCount($this->getTableName() . "." . $this->getPrimaryKey())->get()->getResult();
-        return (int)$result[0]->{$this->getPrimaryKey()};
+        $result = $this->builder->selectCount($this->table . "." . static::$primaryKey)->get()->getResult();
+        return (int)$result[0]->{static::$primaryKey};
     }
 
-
     /**
-     * @inheritdoc
+     * will be executed before save function
      */
     public function beforeSave()
+    {
+    }
+
+    /**
+     * validate
+     */
+    public function validate()
     {
     }
 
@@ -637,8 +673,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     private function insert($data)
     {
         if ($this->builder->set($data, true)->insert()) {
-            $primaryKey = "set".$this->getPrimaryKey();
-            $this->$primaryKey(static::$db->insertID());
+            $this->{static::$primaryKey} = static::$db->insertID();
             return true;
         }
 
@@ -651,8 +686,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     private function update($data)
     {
-        $getPrimaryKey = "get".$this->getPrimaryKey();
-        $this->builder->where($this->getPrimaryKey(), $this->$getPrimaryKey());
+        $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
         if ($this->builder->update($data)) {
             return true;
         }
@@ -661,7 +695,9 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * @return bool
+     * insert new data to table if $Id is empty or null other wise update the data
+     * @param bool $isAutoIncrement your primary key of table
      */
 
     public function save($isAutoIncrement = true)
@@ -680,14 +716,13 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
 
             $data[$field] = $this->$field;
         }
-
-        if (empty($this->{$this->getPrimaryKey()}) || is_null($this->{$this->getPrimaryKey()})) {
+        if (empty($this->{static::$primaryKey}) || is_null($this->{static::$primaryKey})) {
             return $this->insert($data);
         } else {
             if ($isAutoIncrement) {
                 return $this->update($data);
             } else {
-                $existedData = static::find($this->{$this->getPrimaryKey()});
+                $existedData = static::find($this->{static::$primaryKey});
                 if (!$existedData) {
                     return $this->insert($data);
                 } else {
@@ -699,28 +734,30 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * Delete data where primary key in object is not null, throw while primary key null
+     * @throws DatabaseException
      */
     public function delete()
     {
-        $primaryKey = $this->getPrimaryKey();
-        $getprimaryKey = "get$primaryKey";
-        $setprimaryKey = "set$primaryKey";
-        if (empty($this->$getprimaryKey()))
+        if (empty($this->{static::$primaryKey}))
             throw new DatabaseException("Couldn't Find Any Data To Delete");
 
-        $this->builder->where($this->getPrimaryKey(), $this->$getprimaryKey());
+        $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
         if (!$this->builder->delete())
             return false;
 
-        $this->$setprimaryKey(0);
+        $this->{static::$primaryKey} = null;
         return true;
     }
 
     /**
-     * @inheritdoc
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of this Eloquent
+     * @return Eloquent Object or null
+     *
+     * Get parent related table data
      */
-    public function hasOne(string $relatedEloquent, string $foreignKey, $params = []): ?Eloquent
+    public function hasOne(string $relatedEloquent, string $foreignKey, $params = [])
     {
         if (!empty($this->$foreignKey)) {
             if (empty($params)) {
@@ -743,9 +780,13 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of this Eloquent
+     * @return Eloquent Object or New Object
+     *
+     * Get parent related table data
      */
-    public function hasOneOrNew(string $relatedEloquent, string $foreignKey, $params = []): ?Eloquent
+    public function hasOneOrNew(string $relatedEloquent, string $foreignKey, $params = [])
     {
         $result = $this->hasOne($relatedEloquent, $foreignKey, $params);
         if (!is_null($result)) {
@@ -755,7 +796,12 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of this Eloquent
+     * @param array $params
+     * @return Eloquent Object or Error
+     *
+     * Get parent related table data
      */
     public function hasOneOrFail(string $relatedEloquent, string $foreignKey, $params = [])
     {
@@ -767,7 +813,11 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * Reverse of has one
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of this Eloquent
+     * @param array $params
+     * @return null
      */
     public function belongsTo(string $relatedEloquent, string $foreignKey, $params = [])
     {
@@ -793,7 +843,12 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * Reverse of has one
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of this Eloquent
+     * @param array $params
+     * @return Eloquen
+     * @throws DatabaseException
      */
     public function belongsToOrFail(string $relatedEloquent, string $foreignKey, $params = [])
     {
@@ -806,7 +861,12 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inhertidoc
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of related Eloquent
+     * @param string $params param to filter data
+     * @return Eloquent array Object or null
+     *
+     * Get child related table data
      */
     public function hasMany(string $relatedEloquent, string $foreignKey, $params = [])
     {
@@ -814,14 +874,14 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
             throw EloquentException::forNoPrimaryKey(get_class($this));
         }
 
-        if (!empty($this->{$this->getPrimaryKey()})) {
+        if (!empty($this->{static::$primaryKey})) {
 
 
             if (isset($params['where'])) {
-                $params['where'][$foreignKey] = $this->{$this->getPrimaryKey()};
+                $params['where'][$foreignKey] = $this->{static::$primaryKey};
             } else {
                 $params['where'] = [
-                    $foreignKey => $this->{$this->getPrimaryKey()}
+                    $foreignKey => $this->{static::$primaryKey}
                 ];
             }
             $result = $relatedEloquent::findAll($params);
@@ -833,7 +893,12 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of related Eloquent
+     * @param string $params param to filter data
+     * @return Eloquent array Object or null
+     *
+     * Get child related table data
      */
     public function hasFirst(string $relatedEloquent, string $foreignKey, $params = [])
     {
@@ -841,14 +906,14 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
             throw EloquentException::forNoPrimaryKey(get_class($this));
         }
 
-        if (!empty($this->{$this->getPrimaryKey()})) {
+        if (!empty($this->{static::$primaryKey})) {
 
 
             if (isset($params['where'])) {
-                $params['where'][$foreignKey] = $this->{$this->getPrimaryKey()};
+                $params['where'][$foreignKey] = $this->{static::$primaryKey};
             } else {
                 $params['where'] = [
-                    $foreignKey => $this->{$this->getPrimaryKey()}
+                    $foreignKey => $this->{static::$primaryKey}
                 ];
             }
             $result = $relatedEloquent::findAll($params);
@@ -861,8 +926,14 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
         return null;
     }
 
+
     /**
-     * @inheritdoc
+     * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of related Eloquent
+     * @param string $params param to filter data
+     * @return Eloquent array Object or null
+     *
+     * Get child related table data
      */
     public function hasFirstOrNew(string $relatedEloquent, string $foreignKey, $params = [])
     {
@@ -870,14 +941,14 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
             throw EloquentException::forNoPrimaryKey(get_class($this));
         }
 
-        if (!empty($this->{$this->getPrimaryKey()})) {
+        if (!empty($this->{static::$primaryKey})) {
 
 
             if (isset($params['where'])) {
-                $params['where'][$foreignKey] = $this->{$this->getPrimaryKey()};
+                $params['where'][$foreignKey] = $this->{static::$primaryKey};
             } else {
                 $params['where'] = [
-                    $foreignKey => $this->{$this->getPrimaryKey()}
+                    $foreignKey => $this->{static::$primaryKey}
                 ];
             }
             $result = $relatedEloquent::findAll($params);
@@ -889,10 +960,16 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * @param string $relatedEloquent Related Table \App\Eloquent\YourClass
+     * @param string $foreignKey key name of related Eloquent
+     * @param string $params param to filter data
+     * @return Eloquent array Object or Error
+     *
+     * Get child related table data
      */
     public function hasManyOrFail(string $relatedEloquent, string $foreignKey, $params = array())
     {
+
         $result = $this->hasMany($relatedEloquent, $foreignKey, $params);
         if (!is_null($result)) {
             return $result;
@@ -945,7 +1022,8 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     }
 
     /**
-     * @inheritdoc
+     * Return data before it's modified
+     * @return static
      */
     public function getOriginalData()
     {
@@ -958,15 +1036,13 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     public static function batchDelete(array $ids)
     {
-        $instance = static::newInstance();
         $params = [
             "whereIn" => [
-                $instance->getPrimaryKey() => $ids
+                static::$primaryKey => $ids
             ]
         ];
 
-        $instance->setFilters($params);
-        return $instance->builder->delete();
+        return static::remove($params);
     }
 
     /**
@@ -976,22 +1052,17 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     public static function batchDeleteOrError(array $ids)
     {
-
-        $instance = static::newInstance();
         $params = [
             "whereIn" => [
-                $instance->getPrimaryKey() => $ids
+                static::$primaryKey => $ids
             ]
         ];
 
-        $instance->setFilters($params);
-        if ($instance->builder->delete())
+        if (static::remove($params))
             return true;
 
         throw new DatabaseException("Something went wrong while deleting the data");
     }
-
-
 
     /**
      * Remove Data with condition
@@ -1023,7 +1094,7 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
      */
     private static function newInstance()
     {
-        return new static(self::$db);
+        return new static(static::$db);
     }
 
     /**
@@ -1045,25 +1116,5 @@ abstract class Eloquent implements IEloquent, IDbTable, JsonSerializable
     {
         $exceptFields = !empty($except) ? $except : static::unFabricateFields();
         return EloquentFabricator::assign(static::class, $fakeFieldFabricator, $exceptFields);
-    }
-
-    /**
-     * Serialize object instance to array
-     */
-    public function jsonSerialize()
-    {
-        $json = [];
-        foreach ($this->fields as $field) {
-            $json[$field] = $this->$field;
-        }
-
-        return $json;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function validate(){
-
     }
 }

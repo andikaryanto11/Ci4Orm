@@ -1,6 +1,6 @@
 <?php
 
-namespace Ci4Orm\Libraries;
+namespace Ci4Orm\Eloquents;
 
 use Exception;
 use JsonSerializable;
@@ -54,11 +54,11 @@ class EloquentPaging
 		{
 			unset($params[$except]);
 		}
-	
+
 		$getQuery = http_build_query ($params);
 		return $getQuery;
 	}
-	
+
 
 	/**
 	 * Set Paging field
@@ -170,7 +170,7 @@ class EloquentPaging
 			'orLike'     => isset($filter['orLike']) ? $filter['orLike'] : null,
 			'group'      => isset($filter['group']) ? $filter['group'] : null,
 		];
-		
+
 		return $this->eloquent::count($params);
 	}
 }
