@@ -11,6 +11,10 @@ use ReflectionClass;
 class Entity implements IEntity
 {
 
+	/**
+	 *
+	 * @var array
+	 */
 	public array $constraints = [];
 
 	/**
@@ -18,7 +22,6 @@ class Entity implements IEntity
 	 */
 	public function __construct()
 	{
-
 	}
 
 	public function __call($name, $arguments)
@@ -39,7 +42,7 @@ class Entity implements IEntity
 				if ($arrayType[$classIndex] == 'EntityList') {
 					$dataExist = call_user_func_array([$this, $name], $arguments);
 
-					if(!empty($dataExist))
+					if (!empty($dataExist))
 						return $dataExist;
 
 					$currentProps = ORM::getProps($currentClass);
@@ -62,11 +65,10 @@ class Entity implements IEntity
 
 					$setFn = 'set' . $field;
 					call_user_func_array([$this, $setFn], [$list]);
-				}
-				else {
+				} else {
 					$dataExist = call_user_func_array([$this, $name], $arguments);
 
-					if(!empty($dataExist))
+					if (!empty($dataExist))
 						return $dataExist;
 
 					$currentProps = ORM::getProps($currentClass);
@@ -74,34 +76,49 @@ class Entity implements IEntity
 
 					$foreignKey = $currentProps['props'][$field]['foreignKey'];
 
-					if(!empty($arguments)){
+					$looper = EntityLooper::getInstance();
+
+					// which mean this call is come from loop EntityList
+					if ($looper->hasEntityList()) {
+						$entitylist = $looper->getEntityList();
 						$primaryKey = '';
 						$relatedClass = ORM::getProps($relatedEntity);
 						$primaryKey = $relatedClass['primaryKey'];
-						if(empty($arguments[0]->getAssociatedEntities())){
+						if (empty($looper->getItems())) {
 							$param = [
 								'whereIn' => [
-									$primaryKey => $arguments[0]->getAssociatedKey()[$foreignKey]
+									$primaryKey => $entitylist->getAssociatedKey()[$foreignKey]
 								]
 							];
 
 							$entities = (new Repository($relatedEntity))->collect($param);
-							$arguments[0]->setAssociatedEntities($entities);
+							$looper->setItems($entities->getItems());
 						}
 
 						$getFn = 'get' . $primaryKey;
-						foreach($arguments[0]->getAssociatedEntities() as $entity){
-							if(!isset($this->constraints[$foreignKey]))
-								return null;
-								
-							if($entity->$getFn() == $this->constraints[$foreignKey]){
-								return $entity;
+						$result = null;
+						foreach ($looper->getItems() as $entity) {
+							if (!isset($this->constraints[$foreignKey])) {
+								break;
+							}
+
+							if ($entity->$getFn() == $this->constraints[$foreignKey]) {
+								$result = $entity;
+								break;
 							}
 						}
 
+						if ($looper->isLastIndex()) {
+							$looper->clean();
+						}
+
+						if (!is_null($result)) {
+							$setFn = 'set' . $field;
+							call_user_func_array([$this, $setFn], [$result]);
+						}
 					} else {
 						$key = isset($this->constraints[$foreignKey]) ? $this->constraints[$foreignKey] : null;
-						if(!empty($key)){
+						if (!empty($key)) {
 							$instance = (new Repository($relatedEntity))->find($key);
 
 							$setFn = 'set' . $field;

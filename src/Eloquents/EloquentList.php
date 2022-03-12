@@ -2,12 +2,24 @@
 
 namespace Ci4Orm\Eloquents;
 
+use ArrayIterator;
 use Ci4Orm\Exception\ListException;
 use Ci4Orm\Libraries\Lists;
+use IteratorAggregate;
+use Traversable;
 
-class EloquentList extends Lists
+class EloquentList extends Lists implements IteratorAggregate
 {
+    /**
+     *
+     * @var string
+     */
     protected $eloquentclass = "";
+
+    /**
+     *
+     * @param array $items
+     */
     public function __construct($items = [])
     {
         // if (!empty($items))
@@ -219,5 +231,15 @@ class EloquentList extends Lists
         $this->items = $data;
         return $this;
     }
+
+	/**
+	 *
+	 * @inh
+	 */
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator($this->items);
+    }
+
 
 }

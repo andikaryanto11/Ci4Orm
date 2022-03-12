@@ -4,17 +4,29 @@ namespace Ci4Orm\Entities;
 
 use Ci4Orm\Exception\ListException;
 use Ci4Orm\Libraries\Lists;
+use Iterator;
 use PhpParser\Node\Expr\FuncCall;
 
-class EntityList extends Lists
+class EntityList extends Lists implements Iterator
 {
+    /**
+     *
+     * @var string
+     */
     protected $eloquentclass = "";
+
+    /**
+     *
+     * @var array
+     */
 	protected array $associatedKey = [];
-	protected ?EntityList $associatedEntities = null;
+
+    /**
+     *
+     * @param array $items
+     */
     public function __construct($items = [])
     {
-        // if (!empty($items))
-        //     $this->eloquentclass = get_class($items[0]);
         parent::__construct($items);
     }
 
@@ -34,24 +46,6 @@ class EntityList extends Lists
 	 */
 	public function getAssociatedKey(){
 		return $this->associatedKey;
-	}
-
-	/**
-	 *
-	 * @param array $associatedKey
-	 * @return EntityList
-	 */
-	public function setAssociatedEntities(EntityList $associatedEntities){
-		$this->associatedEntities = $associatedEntities;
-		return $this;
-	}
-
-	/**
-	 *
-	 * @return EntityList
-	 */
-	public function getAssociatedEntities(){
-		return $this->associatedEntities;
 	}
 
     /**
@@ -257,6 +251,50 @@ class EntityList extends Lists
         }
         $this->items = $data;
         return $this;
+    }
+
+	//+++++++++ Iterator ++++++++++=
+
+	/**
+	 * @inheritDoc
+	 */
+	public function rewind(): void {
+        $this->position = 0;
+    }
+
+	/**
+	 * @inheritDoc
+	 */
+    public function current() {
+
+		$looper = EntityLooper::getInstance();
+		if(!$looper->hasEntityList())
+			$looper->setEntityList($this);
+
+		$isLastIndex = $this->position == count($this->items) - 1;
+		$looper->setIsLastIndex($isLastIndex);
+        return $this->items[$this->position];
+    }
+
+	/**
+	 * @inheritDoc
+	 */
+    public function key() {
+        return $this->position;
+    }
+
+	/**
+	 * @inheritDoc
+	 */
+    public function next(): void {
+        ++$this->position;
+    }
+
+	/**
+	 * @inheritDoc
+	 */
+    public function valid(): bool {
+        return isset($this->items[$this->position]);
     }
 
 }

@@ -10,7 +10,16 @@ use Traversable;
 class Lists implements IList
 {
 
+    /**
+     *
+     * @var array
+     */
     protected $items = [];
+
+    /**
+     *
+     * @param [type] $items
+     */
     public function __construct($items)
     {
         $this->items = $items;
@@ -110,15 +119,11 @@ class Lists implements IList
         return end($this->items);
     }
 
-	/**
-	 *
-	 * @inh
-	 */
-    public function getIterator(): Traversable
-    {
-        return new ArrayIterator($this->items);
-    }
-
+    /**
+     * will jsonize this class as this array items
+     * 
+     * @return void
+     */
     public function jsonSerialize()
     {
         return $this->items;

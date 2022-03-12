@@ -6,7 +6,7 @@ use Countable;
 use IteratorAggregate;
 use JsonSerializable;
 
-interface IList extends IteratorAggregate, JsonSerializable, Countable {
+interface IList extends JsonSerializable, Countable {
 
 	/**
 	 * Count element
