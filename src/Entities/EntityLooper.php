@@ -9,7 +9,7 @@ class EntityLooper{
 
 	/**
 	 *
-	 * @var EntityLooper 
+	 * @var EntityLooper
 	 */
 	private static ?EntityLooper $instance = null;
 
@@ -20,10 +20,10 @@ class EntityLooper{
 	private array $items = [];
 
 	/**
-	 * 
-	 * @var EntityList|null
+	 *
+	 * @var array
 	 */
-	private ?EntityList $entityList = null;
+	private array $entityList = [];
 
 	/**
 	 *
@@ -54,7 +54,7 @@ class EntityLooper{
 	 */
 	public function clean(){
 		$this->isLastIndex = false;
-		$this->entityList = null;
+		$this->entityList = [];
 		$this->items = [];
 		return $this;
 	}
@@ -63,8 +63,8 @@ class EntityLooper{
 	 * check if current loop has data
 	 * @return boolean
 	 */
-	public function hasEntityList(){
-		return !is_null($this->entityList);
+	public function hasEntityList($key){
+		return isset($this->entityList[$key]);
 	}
 
 	/**
@@ -88,8 +88,8 @@ class EntityLooper{
 	 * @param EntityList $entityList
 	 * @return EntityLooper
 	 */
-	public function setEntityList(EntityList $entityList){
-		$this->entityList = $entityList;
+	public function setEntityList($key, EntityList $entityList){
+		$this->entityList[$key] = $entityList;
 		return $this;
 	}
 
@@ -97,8 +97,8 @@ class EntityLooper{
 	/**
 	 * @return EntityList
 	 */
-	public function getEntityList(){
-		return $this->entityList;
+	public function getEntityList($key){
+		return $this->entityList[$key];
 	}
 
 	/**

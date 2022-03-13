@@ -21,6 +21,12 @@ class EntityList extends Lists implements Iterator
      */
 	protected array $associatedKey = [];
 
+	/**
+	 *
+	 * @var string
+	 */
+	protected $listOf = '';
+
     /**
      *
      * @param array $items
@@ -29,6 +35,25 @@ class EntityList extends Lists implements Iterator
     {
         parent::__construct($items);
     }
+
+	/**
+	 * Set this list of and entity type
+	 *
+	 * @param string $listOf
+	 * @return EntityList
+	 */
+	public function setListOf(string $listOf){
+		$this->listOf = $listOf;
+		return $this;
+	}
+
+	/**
+	 *
+	 * @return string
+	 */
+	public function getListOf(){
+		return $this->listOf;
+	}
 
 	/**
 	 *
@@ -268,8 +293,8 @@ class EntityList extends Lists implements Iterator
     public function current() {
 
 		$looper = EntityLooper::getInstance();
-		if(!$looper->hasEntityList())
-			$looper->setEntityList($this);
+		if(!$looper->hasEntityList($this->getListOf()))
+			$looper->setEntityList($this->getListOf(), $this);
 
 		$isLastIndex = $this->position == count($this->items) - 1;
 		$looper->setIsLastIndex($isLastIndex);

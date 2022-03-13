@@ -166,11 +166,15 @@ class Repository implements IRepository
 	}
 
 	/**
-	 * Undocumented function
+	 * Will fetch array of entity.
+	 * Deprecated, use collect instead to better performance.
+	 * ::collect will lazy load related entity, and eager load of list entity
 	 *
 	 * @param array $filter
 	 * @param array $columns
 	 * @return array
+	 *
+	 * @deprecated <1.0.0
 	 */
 	public function findAll(array $filter = [], $columns = [])
 	{
@@ -402,6 +406,7 @@ class Repository implements IRepository
 		$associated = [];
 		$result = $this->fetch($filter, [] , $associated);
 		$entityList = new EntityList($result);
+		$entityList->setListOf($this->entityClass);
 		$entityList->setAssociatedKey($associated);
 		return $entityList;
 	}

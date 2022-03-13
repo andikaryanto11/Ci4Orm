@@ -73,14 +73,15 @@ class Entity implements IEntity
 
 					$currentProps = ORM::getProps($currentClass);
 					$relatedEntity = $currentProps['props'][$field]['type'];
-
 					$foreignKey = $currentProps['props'][$field]['foreignKey'];
 
 					$looper = EntityLooper::getInstance();
 
-					// which mean this call is come from loop EntityList
-					if ($looper->hasEntityList()) {
-						$entitylist = $looper->getEntityList();
+					$listOf = get_class($this);
+
+					// which mean this call comes from loop EntityList
+					if ($looper->hasEntityList($listOf)) {
+						$entitylist = $looper->getEntityList($listOf);
 						$primaryKey = '';
 						$relatedClass = ORM::getProps($relatedEntity);
 						$primaryKey = $relatedClass['primaryKey'];
@@ -91,20 +92,24 @@ class Entity implements IEntity
 								]
 							];
 
-							$entities = (new Repository($relatedEntity))->collect($param);
-							$looper->setItems($entities->getItems());
+							$entities = (new Repository($relatedEntity))->collect($param)->getItems();
+							$items = [];
+							foreach($entities as $entity){
+								$getFn = 'get'.$primaryKey;
+								$pkValue = $entity->$getFn();
+								$items[$pkValue] = $entity;
+							}
+							$looper->setItems($items);
 						}
 
-						$getFn = 'get' . $primaryKey;
 						$result = null;
-						foreach ($looper->getItems() as $entity) {
-							if (!isset($this->constraints[$foreignKey])) {
-								break;
-							}
-
-							if ($entity->$getFn() == $this->constraints[$foreignKey]) {
-								$result = $entity;
-								break;
+						$itemOfLooper = $looper->getItems();
+						if(count($itemOfLooper) > 0){
+							if(!empty($this->constraints)){
+								$keyValue = $this->constraints[$foreignKey];
+								if(isset($itemOfLooper[$keyValue])){
+									$result = $itemOfLooper[$keyValue];
+								}
 							}
 						}
 
