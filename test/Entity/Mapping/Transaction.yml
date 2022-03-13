@@ -1,0 +1,15 @@
+Ci4OrmTest\Entity\Transaction:
+  table: 'transaction'
+  primaryKey: 'id'
+  props:
+    Id: 
+      type: 'int'
+      isEntity: false
+    NoOrder: 
+      type: 'string'
+      isEntity: false
+    TransactionDetails:
+      type: 'Ci4OrmTest\Entity\TransactionDetail'
+      isEntity: true
+      relationType: 'many_to_one'
+      mappedBy: 'Transaction'

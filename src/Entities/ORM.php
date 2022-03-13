@@ -76,10 +76,10 @@ class ORM
 	 *
 	 * @return array
 	 */
-    public static function parse()
+    public static function parse(string $patToDir = null)
     {
         $result = array();
-        $dir = Entity::register();
+        $dir = is_null($patToDir) ? Entity::register() : $patToDir;
         $cdir = scandir($dir);
         foreach ($cdir as $key => $value) {
             if (!in_array($value, array(".", ".."))) {

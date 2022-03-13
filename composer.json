@@ -10,11 +10,18 @@
         "fzaninotto/faker": "1.9.2",
         "symfony/yaml": "^5.4"
     },
+    "require-dev": {
+		"phpunit/phpunit": "^9.5.9",
+		"codeception/specify": "^1.4",
+		"codeception/verify": "^2.1",
+		"phpspec/prophecy-phpunit": "^2.0"
+	},
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "Ci4Orm\\": "src/"
+            "Ci4Orm\\": "src/",
+            "Ci4OrmTest\\": "test/"
         }
     }
     
