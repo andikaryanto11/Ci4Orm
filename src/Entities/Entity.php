@@ -75,13 +75,12 @@ class Entity implements IEntity
 					$relatedEntity = $currentProps['props'][$field]['type'];
 					$foreignKey = $currentProps['props'][$field]['foreignKey'];
 
-					$looper = EntityLooper::getInstance();
-
 					$listOf = get_class($this);
+					$looper = EntityLooper::getInstance($listOf);
 
 					// which mean this call comes from loop EntityList
-					if ($looper->hasEntityList($listOf)) {
-						$entitylist = $looper->getEntityList($listOf);
+					if ($looper->hasEntityList()) {
+						$entitylist = $looper->getEntityList();
 						$primaryKey = '';
 						$relatedClass = ORM::getProps($relatedEntity);
 						$primaryKey = $relatedClass['primaryKey'];

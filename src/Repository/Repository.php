@@ -43,7 +43,6 @@ class Repository implements IRepository
 	 *
 	 * @var ?IEntity
 	 */
-
 	protected BaseConnection $db;
 
 	/**
@@ -52,7 +51,6 @@ class Repository implements IRepository
 	 */
 	public function __construct(
 		string $entityClass
-
 	) {
 		$this->entityClass = $entityClass;
 		$this->props = ORM::getProps($this->entityClass);
@@ -60,7 +58,6 @@ class Repository implements IRepository
 		$this->builder = $this->db->table($this->props['table']);
 		$this->selectColumns = ORM::getSelectColumns($this->entityClass);
 	}
-
 	public function getProps()
 	{
 		return $this->props;
@@ -364,22 +361,6 @@ class Repository implements IRepository
 						if (!is_null($result->$foreignKey)) {
 							$associated[$value['foreignKey']][] = $result->$foreignKey;
 							$obj->constraints[$value['foreignKey']] = $result->$foreignKey;
-							// $instanceRelatedClass = new self($value['type'], $this->level + 1);
-
-							// if($instanceRelatedClass->getLevel() < 5){
-							// 	$instance = null;
-							// 	$queryKey = $instanceRelatedClass->getProps()['table'] . '~' .
-							// 		$instanceRelatedClass->getProps()['primaryKey'] . '~' .
-							// 		$result->$foreignKey;
-							// 	$queryData = $this->repositoryQueryCollector->getQuery($queryKey);
-							// 	if(empty($queryData))
-							// 		$instance = $instanceRelatedClass->find($result->$foreignKey);
-							// 	else
-							// 		$instance = $queryData;
-
-							// 	$this->repositoryQueryCollector->addQueryAndResult($queryKey, $instance);
-							// 	$obj->$method($instance);
-							// }
 						}
 					}
 

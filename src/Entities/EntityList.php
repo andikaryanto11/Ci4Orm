@@ -292,9 +292,9 @@ class EntityList extends Lists implements Iterator
 	 */
     public function current() {
 
-		$looper = EntityLooper::getInstance();
-		if(!$looper->hasEntityList($this->getListOf()))
-			$looper->setEntityList($this->getListOf(), $this);
+		$looper = EntityLooper::getInstance($this->getListOf());
+		if(!$looper->hasEntityList())
+			$looper->setEntityList($this);
 
 		$isLastIndex = $this->position == count($this->items) - 1;
 		$looper->setIsLastIndex($isLastIndex);
