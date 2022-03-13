@@ -58,6 +58,7 @@ class Repository implements IRepository
 		$this->builder = $this->db->table($this->props['table']);
 		$this->selectColumns = ORM::getSelectColumns($this->entityClass);
 	}
+	
 	public function getProps()
 	{
 		return $this->props;
