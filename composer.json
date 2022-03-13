@@ -14,7 +14,8 @@
 		"phpunit/phpunit": "^9.5.9",
 		"codeception/specify": "^1.4",
 		"codeception/verify": "^2.1",
-		"phpspec/prophecy-phpunit": "^2.0"
+		"phpspec/prophecy-phpunit": "^2.0",
+        "mockery/mockery": "^1.5"
 	},
     "minimum-stability": "dev",
     "prefer-stable": true,
