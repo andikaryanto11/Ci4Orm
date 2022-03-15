@@ -5,15 +5,14 @@ namespace Ci4OrmTest\Test\Repository;
 use Ci4Orm\Entities\EntityList;
 use Ci4Orm\Entities\MappingReader;
 use Ci4Orm\Entities\ORM;
+use Ci4Orm\Exception\EntityException;
 use Codeception\Specify;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ci4Orm\Repository\Repository;
 use Ci4OrmTest\Entity\Transaction;
-use Exception;
 use Mockery;
 use stdClass;
-use Symfony\Component\Yaml\Yaml;
 
 class RespositoryTest extends TestCase
 {
@@ -92,22 +91,110 @@ class RespositoryTest extends TestCase
     public function testCollect()
     {
 
-        $this->transaction = (new Transaction())
-            ->setId(1)
-            ->setNoOrder("NHYT-123345");
-
-
         $Transaction = new stdClass();
         $Transaction->Id = 1;
         $Transaction->NoOrder = 'AJDW-12345';
+
+        $Transaction2 = new stdClass();
+        $Transaction2->Id = 2;
+        $Transaction2->NoOrder = 'AJDW-123456';
         $this->mock();
 
         $this->builder->shouldReceive('select')->andReturn($this->builder);
         $this->builder->shouldReceive('get')->andReturn($this->builder);
-        $this->builder->shouldReceive('getResult')->andReturn([$Transaction]);
+        $this->builder->shouldReceive('getResult')->andReturn([$Transaction, $Transaction2]);
 
         $entities = $this->repository->collect();
         expect($entities)->toBeInstanceOf(EntityList::class);
         expect($entities->getListOf())->toEqual(Transaction::class);
+    }
+
+    public function testFind()
+    {
+
+        $Transaction = new stdClass();
+        $Transaction->Id = 1;
+        $Transaction->NoOrder = 'AJDW-12345';
+
+        $this->mock();
+
+        $this->builder->shouldReceive('where')->with(['Id' => 1])->andReturn($this->builder);
+        $this->builder->shouldReceive('select')->andReturn($this->builder);
+        $this->builder->shouldReceive('get')->andReturn($this->builder);
+        $this->builder->shouldReceive('getResult')->andReturn([$Transaction]);
+
+        $entities = $this->repository->find(1);
+        expect($entities)->toBeInstanceOf(Transaction::class);
+    }
+
+    /**
+     * will return new object
+     *
+     * @return void
+     */
+    public function testFindOrNew()
+    {
+
+        $this->mock();
+
+        $this->builder->shouldReceive('where')->with(['Id' => 1])->andReturn($this->builder);
+        $this->builder->shouldReceive('select')->andReturn($this->builder);
+        $this->builder->shouldReceive('get')->andReturn($this->builder);
+        $this->builder->shouldReceive('getResult')->andReturn([]);
+
+        $entities = $this->repository->findOrNew(1);
+        expect($entities)->toBeInstanceOf(Transaction::class);
+        expect($entities->getId())->toEqual(0);
+    }
+
+    /**
+     * will throw error
+     *
+     * @return void
+     */
+    public function testFindOrFail()
+    {
+
+        $this->mock();
+
+        $this->builder->shouldReceive('where')->with(['Id' => 1])->andReturn($this->builder);
+        $this->builder->shouldReceive('select')->andReturn($this->builder);
+        $this->builder->shouldReceive('get')->andReturn($this->builder);
+        $this->builder->shouldReceive('getResult')->andReturn([]);
+
+        try{
+            $entities = $this->repository->findOrFail(1);
+        } catch (EntityException $e){
+            expect($e->getMessage())->toEqual('Data with id 1 not found');
+        }
+       
+    }
+
+
+    /**
+     * will throw error
+     *
+     * @return void
+     */
+    public function testFindOne()
+    {
+
+        $Transaction = new stdClass();
+        $Transaction->Id = 1;
+        $Transaction->NoOrder = 'AJDW-12345';
+
+        $Transaction2 = new stdClass();
+        $Transaction2->Id = 2;
+        $Transaction2->NoOrder = 'AJDW-123456';
+        
+        $this->mock();
+
+        $this->builder->shouldReceive('select')->andReturn($this->builder);
+        $this->builder->shouldReceive('get')->andReturn($this->builder);
+        $this->builder->shouldReceive('getResult')->andReturn([$Transaction, $Transaction2]);
+
+        $entities = $this->repository->findOne();
+        expect($entities)->toBeInstanceOf(Transaction::class);
+       
     }
 }

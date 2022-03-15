@@ -1,6 +1,6 @@
 Ci4OrmTest\Entity\TransactionDetail:
   table: 'transaction_detail'
-  primaryKey: 'id'
+  primaryKey: 'Id'
   props:
     Id: 
       type: 'int'

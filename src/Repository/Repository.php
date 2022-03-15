@@ -117,7 +117,7 @@ class Repository implements IRepository
 	{
 		$result = $this->find($id);
 		if (empty($result)) {
-			throw new EntityException('Data with id ' . $id . 'not found');
+			throw new EntityException('Data with id ' . $id . ' not found');
 		}
 		return $result;
 	}
