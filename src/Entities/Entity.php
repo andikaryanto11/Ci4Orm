@@ -24,6 +24,10 @@ class Entity implements IEntity
 	{
 	}
 
+	public function getPrimaryKeyName(){
+		return ORM::getProps(get_class($this))['primaryKey'];
+	}
+
 	public function __call($name, $arguments)
 	{
 		$method = substr($name, 0, 3);

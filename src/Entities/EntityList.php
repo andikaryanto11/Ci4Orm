@@ -90,32 +90,6 @@ class EntityList extends Lists implements Iterator
     }
 
     /**
-     * Find Data with id
-     *
-     */
-    public function find($id)
-    {
-        return $this->filter(function ($item) use ($id) {
-            return $item->{get_class($item)::$primaryKey} == $id;
-        });
-    }
-
-    /**
-     * Find data except id
-     *
-     */
-    public function except(array $ids)
-    {
-        if (!is_array($ids)) {
-            throw new ListException("IDs must be an array");
-        }
-
-        return $this->filter(function ($item) use ($ids) {
-            return !in_array($item->{get_class($item)::$primaryKey}, $ids);
-        });
-    }
-
-    /**
      * Get data value form column name
      */
 
@@ -166,7 +140,7 @@ class EntityList extends Lists implements Iterator
     public function unSaved()
     {
         return $this->filter(function ($item) {
-            return empty($item->{get_class($item)::$primaryKey});
+            return empty($item->{'get'.$item->getPrimaryKeyName()}());
         });
     }
 
@@ -177,7 +151,7 @@ class EntityList extends Lists implements Iterator
     public function saved()
     {
         return $this->filter(function ($item) {
-            return !empty($item->{get_class($item)::$primaryKey});
+            return !empty($item->{'get'.$item->getPrimaryKeyName()}());
         });
     }
 
@@ -208,11 +182,11 @@ class EntityList extends Lists implements Iterator
     }
 
     /**
-     * Minimal value of field, if $return set 'model' then object model will be returned otherwise value of field
+     * Minimal value of field, if $return set 'object' then object model will be returned otherwise value of field
      * @param string $columnName
-     * @param string $return 'model' / 'field'
+     * @param string $return 'object' / 'field'
      */
-    public function min($columnName, $return = "Model"){
+    public function min($columnName, $return = "object"){
         $min = 0;
         $data = null;
         foreach($this->items as $item){
@@ -227,14 +201,14 @@ class EntityList extends Lists implements Iterator
                 $min = $item->{"get$columnName"}();
             }
         }
-        return $return == "model" ? $data : $min;
+        return $return == "object" ? $data : $min;
     }
 
      /**
-     * Maximal value of field, if $return set 'model' then object model will be returned otherwise value of field
+     * Maximal value of field, if $return set 'object' then object model will be returned otherwise value of field
      * @param string $columnName
      */
-    public function max($columnName, $return = "model"){
+    public function max($columnName, $return = "object"){
         $max = 0;
         $data = null;
         foreach($this->items as $item){
@@ -249,7 +223,7 @@ class EntityList extends Lists implements Iterator
                 $max = $item->{"get$columnName"}();
             }
         }
-        return $return == "model" ? $data : $max;
+        return $return == "object" ? $data : $max;
     }
 
     /**
@@ -260,13 +234,13 @@ class EntityList extends Lists implements Iterator
         $keys = [];
         $data = [];
         foreach($this->items as $item){
-            if(!in_array($item->{get_class($item)::$primaryKey}, $keys)){
-                $keys[] = $item->{get_class($item)::$primaryKey};
+            if(!in_array($item->{'get'.$item->getPrimaryKeyName()}(), $keys)){
+                $keys[] = $item->{'get'.$item->getPrimaryKeyName()};
                 $data[] = $item;
             } else {
                 $index = 0;
                 foreach($keys as $key){
-                    if($key == $item->{get_class($item)::$primaryKey});
+                    if($key == $item->{'get'.$item->getPrimaryKeyName()}());
                         break;
                     $index++;
                 }
