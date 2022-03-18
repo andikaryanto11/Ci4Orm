@@ -9,15 +9,17 @@ on:
 jobs:
   build:
 
-    runs-on: u
-    - uses: actions/checkout@v2
+    runs-on: ubuntu-latest
 
+
+    steps:
+    - uses: actions/checkout@v2
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: 7.4
-
+    
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
 
@@ -37,4 +39,4 @@ jobs:
       run: vendor/bin/phpunit test
 
     - name: PHP standart code 
-      run: ./vendor/bin/phpcbf --standard=PSR12 src/ test/ 
+      run: ./vendor/bin/phpcbf --standard=PSR12 src/ test/
