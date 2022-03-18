@@ -22,11 +22,12 @@ class EloquentFabricator
         $faker = Factory::create();
         $classFields = $eloquentClass::getProperties();
 
-        if (count($classFields) - count($except) != count($fakeFieldsFabracator))
+        if (count($classFields) - count($except) != count($fakeFieldsFabracator)) {
             throw new FabricatorException("Eloquent Fields count is not the same with fakeField");
+        }
 
         $fieldIndex = 0;
-        $eloquentInstance = new $eloquentClass;
+        $eloquentInstance = new $eloquentClass();
         foreach ($classFields as $field) {
             if (!in_array($field, $except)) {
                 $fakeField = $fakeFieldsFabracator[$fieldIndex];

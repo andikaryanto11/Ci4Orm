@@ -96,8 +96,9 @@ class EloquentList extends Lists implements IteratorAggregate
             if (!property_exists($item, $columnName)) {
                 throw new ListException("Column '$columnName' is not found");
             }
-            if(!in_array($item->$columnName(), $data))
+            if (!in_array($item->$columnName(), $data)) {
                 $data[] = $item->$columnName();
+            }
         }
         return $data;
     }
@@ -140,9 +141,10 @@ class EloquentList extends Lists implements IteratorAggregate
      * @param string $columnName
      *
      */
-    public function sum($columnName){
+    public function sum($columnName)
+    {
         $total = 0;
-        foreach($this->items as $item){
+        foreach ($this->items as $item) {
             $total += $item->$columnName();
         }
         return $total;
@@ -153,9 +155,10 @@ class EloquentList extends Lists implements IteratorAggregate
      * @param string $columnName
      *
      */
-    public function avg($columnName){
+    public function avg($columnName)
+    {
         $total = 0;
-        foreach($this->items as $item){
+        foreach ($this->items as $item) {
             $total += $item->$columnName();
         }
         return $total / count($this->items);
@@ -166,17 +169,18 @@ class EloquentList extends Lists implements IteratorAggregate
      * @param string $columnName
      * @param string $return 'model' / 'field'
      */
-    public function min($columnName, $return = "Model"){
+    public function min($columnName, $return = "Model")
+    {
         $min = 0;
         $data = null;
-        foreach($this->items as $item){
-            if(is_null($data)){
+        foreach ($this->items as $item) {
+            if (is_null($data)) {
                 $data = $item;
                 $min = $item->$columnName();
                 continue;
             }
 
-            if($item->$columnName() < $min){
+            if ($item->$columnName() < $min) {
                 $data = $item;
                 $min = $item->$columnName();
             }
@@ -188,17 +192,18 @@ class EloquentList extends Lists implements IteratorAggregate
      * Maximal value of field, if $return set 'model' then object model will be returned otherwise value of field
      * @param string $columnName
      */
-    public function max($columnName, $return = "model"){
+    public function max($columnName, $return = "model")
+    {
         $max = 0;
         $data = null;
-        foreach($this->items as $item){
-            if(is_null($data)){
+        foreach ($this->items as $item) {
+            if (is_null($data)) {
                 $data = $item;
                 $max = $item->$columnName();
                 continue;
             }
 
-            if($item->$columnName() > $max){
+            if ($item->$columnName() > $max) {
                 $data = $item;
                 $max = $item->$columnName();
             }
@@ -210,17 +215,19 @@ class EloquentList extends Lists implements IteratorAggregate
      * Get only unique data, data with no duplicate / same Id
      * @return EloquestList
      */
-    public function unique(){
+    public function unique()
+    {
         $keys = [];
         $data = [];
-        foreach($this->items as $item){
-            if(!in_array($item->{get_class($item)::$primaryKey}, $keys)){
+        foreach ($this->items as $item) {
+            if (!in_array($item->{get_class($item)::$primaryKey}, $keys)) {
                 $keys[] = $item->{get_class($item)::$primaryKey};
                 $data[] = $item;
             } else {
                 $index = 0;
-                foreach($keys as $key){
-                    if($key == $item->{get_class($item)::$primaryKey});
+                foreach ($keys as $key) {
+                    if ($key == $item->{get_class($item)::$primaryKey}) {
+                    }
                         break;
                     $index++;
                 }
@@ -232,14 +239,12 @@ class EloquentList extends Lists implements IteratorAggregate
         return $this;
     }
 
-	/**
-	 *
-	 * @inh
-	 */
+    /**
+     *
+     * @inh
+     */
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->items);
     }
-
-
 }

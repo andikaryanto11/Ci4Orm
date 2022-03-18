@@ -5,39 +5,44 @@ namespace Ci4Orm\Repository;
 use Ci4Orm\Entity\ORM;
 use Ci4Orm\Interfaces\IEntity;
 
-class RepositoryQueryCollector {
+class RepositoryQueryCollector
+{
+    /**
+     * @var array
+     */
+    protected array $queries = [];
 
-	/**
-	 * @var array
-	 */
-	protected array $queries = [];
+    protected static $instance = null;
 
-	protected static $instance = null;
+    private function __construct()
+    {
+    }
 
-	private function __construct()
-	{
+    public static function getInstance()
+    {
+        if (self::$instance == null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
 
-	}
+    public function addQueryAndResult(string $key, $result)
+    {
+        $this->queries[$key] = $result;
+    }
 
-	public static function getInstance(){
-		if(self::$instance == null)
-			self::$instance = new self();
-		return self::$instance;
-	}
+    public function getQueries()
+    {
+        return $this->queries;
+    }
 
-	public function addQueryAndResult(string $key, $result){
-		$this->queries[$key] = $result;
-	}
+    public function getQuery($key)
+    {
+        return isset($this->queries[$key]) ? $this->queries[$key] : null;
+    }
 
-	public function getQueries(){
-		return $this->queries;
-	}
-
-	public function getQuery($key){
-		return isset($this->queries[$key]) ? $this->queries[$key] : null;
-	}
-
-	public function clean(){
-		$this->queries = [];
-	}
+    public function clean()
+    {
+        $this->queries = [];
+    }
 }

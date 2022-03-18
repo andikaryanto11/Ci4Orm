@@ -9,7 +9,6 @@ use Traversable;
 
 class Lists implements IList
 {
-
     /**
      *
      * @var array
@@ -63,8 +62,9 @@ class Lists implements IList
      */
     public function take($number): array
     {
-        if ($number <= 0)
+        if ($number <= 0) {
             throw new ListException("Number must be greater than 0 (zero)");
+        }
 
         if (count($this->items) < $number) {
             return  $this->items;
@@ -78,7 +78,8 @@ class Lists implements IList
      * @param Closure $callback
      * @return int
      */
-    public function index($callback): int{
+    public function index($callback): int
+    {
         $i = 0;
         foreach ($this->items as $item) {
             if ($callback($item)) {
@@ -93,9 +94,11 @@ class Lists implements IList
      * Get first element data
      * @return
      */
-    public function first(){
-        if(empty($this->items))
+    public function first()
+    {
+        if (empty($this->items)) {
             throw new ListException("Item empty");
+        }
 
         return $this->items[0];
     }
@@ -112,16 +115,18 @@ class Lists implements IList
     /**
      * Get last element data
      */
-    public function last(){
-        if(empty($this->items))
+    public function last()
+    {
+        if (empty($this->items)) {
             throw new ListException("Item empty");
+        }
 
         return end($this->items);
     }
 
     /**
      * will jsonize this class as this array items
-     * 
+     *
      * @return void
      */
     public function jsonSerialize()
@@ -138,11 +143,11 @@ class Lists implements IList
         return count($this->items);
     }
 
-	/**
-	 * @return int
-	 */
-	public function count(): int {
-		return count($this->items);
-	}
-
+    /**
+     * @return int
+     */
+    public function count(): int
+    {
+        return count($this->items);
+    }
 }

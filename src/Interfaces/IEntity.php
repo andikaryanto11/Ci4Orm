@@ -1,6 +1,7 @@
 <?php
+
 namespace Ci4Orm\Interfaces;
 
-interface IEntity {
-
+interface IEntity
+{
 }

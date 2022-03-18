@@ -12,7 +12,6 @@ use Ci4Orm\Libraries\EloquentList;
 
 interface IRepository
 {
-
     /**
      * Find data by id
      *
@@ -24,7 +23,7 @@ interface IRepository
      * Find data by id or new entity instance
      *
      * @param int|string $id
-	 * @return IEntity
+     * @return IEntity
      */
     public function findOrNew($id);
 
@@ -32,14 +31,14 @@ interface IRepository
      * Find data by id or throw error
      *
      * @param int|string $id
-	 * @return IEntity
+     * @return IEntity
      * @throws EntityException
      */
     public function findOrFail($id);
 
     /**
      * Find data by filter value
-	 *
+     *
      * @param  array $filter
      * @return IEntity|null
      */
@@ -87,7 +86,7 @@ interface IRepository
 
     /**
      * Get datatables server side  results array
-	 *
+     *
      * @param array $filter
      * @param boolean $returnEntity set to true array data will contain entity of class which call this function
      * @param boolean $useIndex set to false if datatables in front end use column name

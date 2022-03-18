@@ -14,12 +14,12 @@ class EntityListTest extends TestCase
      */
     protected EntityList $entityList;
 
-    public function setUp(): void 
+    public function setUp(): void
     {
 
         $configEntity = Mockery::mock('alias:\Config\Entity');
         $configEntity->shouldReceive('register')->andReturn('test/Entity/Mapping');
-        
+
         $Transaction = (new Transaction())
             ->setId(1)
             ->setNoOrder('AHM-12345');
@@ -44,15 +44,15 @@ class EntityListTest extends TestCase
         ];
 
         $this->entityList = (new EntityList($items));
-
     }
 
     /**
      * will uniq the intended field
      * @return void
      */
-    public function testChunk(){
-        
+    public function testChunk()
+    {
+
         $chunk = $this->entityList->chunk('NoOrder');
         expect($chunk)->toEqual(['AHM-12345', 'AHM-123456', 'AHM-123456', 'AHM-123457']);
     }
@@ -61,8 +61,9 @@ class EntityListTest extends TestCase
      * will uniq the intended field
      * @return void
      */
-    public function testChunkUnique(){
-        
+    public function testChunkUnique()
+    {
+
         $uniq = $this->entityList->chunkUnique('NoOrder');
         expect($uniq)->toEqual(['AHM-12345', 'AHM-123456', 'AHM-123457']);
     }
@@ -71,8 +72,9 @@ class EntityListTest extends TestCase
      * will return the unsaved data only
      * @return void
      */
-    public function testUnSaved(){
-        
+    public function testUnSaved()
+    {
+
         $unsaved = $this->entityList->unSaved();
         expect(count($unsaved))->toEqual(1);
     }
@@ -81,8 +83,9 @@ class EntityListTest extends TestCase
      * will return the saved data only
      * @return void
      */
-    public function testSaved(){
-        
+    public function testSaved()
+    {
+
         $unsaved = $this->entityList->saved();
         expect(count($unsaved))->toEqual(3);
     }
@@ -91,8 +94,9 @@ class EntityListTest extends TestCase
      * will return sum of the column
      * @return void
      */
-    public function testSum(){
-        
+    public function testSum()
+    {
+
         $sum = $this->entityList->sum('Id');
         expect($sum)->toEqual(6);
     }
@@ -101,8 +105,9 @@ class EntityListTest extends TestCase
      * will return average of the column
      * @return void
      */
-    public function testAvg(){
-        
+    public function testAvg()
+    {
+
         $sum = $this->entityList->avg('Id');
         expect($sum)->toEqual(1.5);
     }
@@ -111,8 +116,9 @@ class EntityListTest extends TestCase
      * will return minimum value
      * @return void
      */
-    public function testMin(){
-        
+    public function testMin()
+    {
+
         $sum = $this->entityList->min('Id', 'field');
         expect($sum)->toEqual(0);
     }
@@ -121,8 +127,9 @@ class EntityListTest extends TestCase
      * will return max value
      * @return void
      */
-    public function testMax(){
-        
+    public function testMax()
+    {
+
         $sum = $this->entityList->max('Id', 'field');
         expect($sum)->toEqual(3);
     }

@@ -5,8 +5,8 @@ namespace Ci4OrmTest\Entity;
 use Ci4Orm\Entities\Entity;
 use Ci4Orm\Entities\EntityList;
 
-class Transaction extends Entity {
-    
+class Transaction extends Entity
+{
      /**
      * @var int
      */
@@ -17,19 +17,20 @@ class Transaction extends Entity {
      * @var string|null
      */
     private ?string $NoOrder = null;
-    
+
     /**
      *
      * @var EntityList|null
      */
-    private ?EntityList $TransactionDetails = null; 
+    private ?EntityList $TransactionDetails = null;
 
     /**
      *
      * @param integer $Id
      * @return Transaction
      */
-    public function setId(int $Id){
+    public function setId(int $Id)
+    {
         $this->Id = $Id;
         return $this;
     }
@@ -38,7 +39,8 @@ class Transaction extends Entity {
      *
      * @return int
      */
-    public function getId(): int{
+    public function getId(): int
+    {
         return $this->Id;
     }
 
@@ -47,7 +49,8 @@ class Transaction extends Entity {
      * @param string $NoOrder
      * @return Transaction
      */
-    public function setNoOrder(string $NoOrder){
+    public function setNoOrder(string $NoOrder)
+    {
         $this->NoOrder = $NoOrder;
         return $this;
     }
@@ -56,7 +59,8 @@ class Transaction extends Entity {
      *
      * @return string
      */
-    public function getNoOrder(): ?string{
+    public function getNoOrder(): ?string
+    {
         return $this->NoOrder;
     }
 
@@ -65,7 +69,8 @@ class Transaction extends Entity {
      * @param EntityList $TransactionDetails
      * @return Transaction
      */
-    public function setTransactionDetails(EntityList $TransactionDetails){
+    public function setTransactionDetails(EntityList $TransactionDetails)
+    {
         $this->TransactionDetails = $TransactionDetails;
         return $this;
     }
@@ -74,7 +79,8 @@ class Transaction extends Entity {
      *
      * @return EntityList
      */
-    public function getTransactionDetails(): ?EntityList {
+    public function getTransactionDetails(): ?EntityList
+    {
         return $this->TransactionDetails;
     }
 }

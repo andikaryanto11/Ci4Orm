@@ -24,7 +24,7 @@ class RespositoryTest extends TestCase
      */
     protected Repository $repository;
 
-    public function setUp(): void 
+    public function setUp(): void
     {
         $configEntity = Mockery::mock('alias:\Config\Entity');
         $database = Mockery::mock('alias:\Config\Database');
@@ -114,12 +114,11 @@ class RespositoryTest extends TestCase
         $this->builder->shouldReceive('where')->with(['Id' => 1])->andReturn($this->builder);
         $this->resultInterface->shouldReceive('getResult')->andReturn([]);
 
-        try{
+        try {
             $entities = $this->repository->findOrFail(1);
-        } catch (EntityException $e){
+        } catch (EntityException $e) {
             expect($e->getMessage())->toEqual('Data with id 1 not found');
         }
-
     }
 
     /**
@@ -145,7 +144,6 @@ class RespositoryTest extends TestCase
         $entities = $this->repository->findOne();
         expect($entities)->toBeInstanceOf(Transaction::class);
         expect($entities->getId())->toEqual(1);
-
     }
 
     public function tearDown(): void

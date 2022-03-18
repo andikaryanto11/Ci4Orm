@@ -1,10 +1,11 @@
 <?php
+
 namespace Ci4Orm\Interfaces;
 
 use Ci4Orm\Exception\DatabaseException;
 
-interface IEloquent {
-
+interface IEloquent
+{
     /**
      * Check if intance has changed value from orginal daata
      * @return bool
@@ -14,7 +15,7 @@ interface IEloquent {
     /**
      * @param array $filter
      * @return bool
-     * 
+     *
      * check if data exist
      */
     public function isDataExist(array $filter);
@@ -22,15 +23,15 @@ interface IEloquent {
     /**
      * @param array $columnName
      * @return array Of specific column data
-     * 
-     * get all column data 
+     *
+     * get all column data
      */
     public function chunk($columnName);
 
     /**
      * @param array $filter
      * @return array
-     * 
+     *
      * get all data result from table
      */
     public function fetch(array $filter = [], $returnEntity = true, $columns = []);
@@ -58,7 +59,7 @@ interface IEloquent {
      * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
      * @param string $foreignKey key name of this Eloquent
      * @return Eloquent Object or null
-     * 
+     *
      * Get parent related table data
      */
     public function hasOne(string $relatedEloquent, string $foreignKey, $params = []);
@@ -67,7 +68,7 @@ interface IEloquent {
      * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
      * @param string $foreignKey key name of this Eloquent
      * @return Eloquent Object or New Object
-     * 
+     *
      * Get parent related table data
      */
     public function hasOneOrNew(string $relatedEloquent, string $foreignKey, $params = []);
@@ -75,9 +76,9 @@ interface IEloquent {
      /**
      * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
      * @param string $foreignKey key name of this Eloquent
-     * @param array $params 
+     * @param array $params
      * @return Eloquent Object or Error
-     * 
+     *
      * Get parent related table data
      */
     public function hasOneOrFail(string $relatedEloquent, string $foreignKey, $params = []);
@@ -86,7 +87,7 @@ interface IEloquent {
      * Reverse of has one
      * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
      * @param string $foreignKey key name of this Eloquent
-     * @param array $params 
+     * @param array $params
      * @return null
      */
     public function belongsTo(string $relatedEloquent, string $foreignKey, $params = []);
@@ -95,7 +96,7 @@ interface IEloquent {
      * Reverse of has one
      * @param string $relatedEloquent Relates Table \App\Eloquent\YourClass
      * @param string $foreignKey key name of this Eloquent
-     * @param array $params 
+     * @param array $params
      * @return Eloquen
      * @throws DatabaseException
      */
@@ -106,7 +107,7 @@ interface IEloquent {
      * @param string $foreignKey key name of related Eloquent
      * @param string $params param to filter data
      * @return Eloquent array Object or null
-     * 
+     *
      * Get child related table data
      */
     public function hasMany(string $relatedEloquent, string $foreignKey, $params = []);
@@ -116,7 +117,7 @@ interface IEloquent {
      * @param string $foreignKey key name of related Eloquent
      * @param string $params param to filter data
      * @return Eloquent array Object or null
-     * 
+     *
      * Get child related table data
      */
     public function hasFirst(string $relatedEloquent, string $foreignKey, $params = []);
@@ -126,7 +127,7 @@ interface IEloquent {
      * @param string $foreignKey key name of related Eloquent
      * @param string $params param to filter data
      * @return Eloquent array Object or null
-     * 
+     *
      * Get child related table data
      */
     public function hasFirstOrNew(string $relatedEloquent, string $foreignKey, $params = []);
@@ -136,14 +137,14 @@ interface IEloquent {
      * @param string $foreignKey key name of related Eloquent
      * @param string $params param to filter data
      * @return Eloquent array Object or Error
-     * 
+     *
      * Get child related table data
      */
     public function hasManyOrFail(string $relatedEloquent, string $foreignKey, $params = array());
 
     /**
      * Return data before it's modified
-     * @return static 
+     * @return static
      */
     public function getOriginalData();
 
@@ -151,5 +152,4 @@ interface IEloquent {
      * Validate an Eloquent object
      */
     public function validate();
-
 }
