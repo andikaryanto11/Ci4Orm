@@ -1,4 +1,4 @@
-name: Ci4-Actions-Original-Code
+name: Ci4Orm
 
 on:
   push:
