@@ -1,8 +1,9 @@
 <?php
+
 namespace Ci4Orm\Interfaces;
 
-interface IDbTable {
-
+interface IDbTable
+{
     /**
      * get table name
      * @return string
@@ -15,5 +16,4 @@ interface IDbTable {
      * @return string
      */
     public function getPrimaryKey();
-    
 }

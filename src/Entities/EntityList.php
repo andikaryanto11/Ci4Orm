@@ -19,13 +19,13 @@ class EntityList extends Lists implements Iterator
      *
      * @var array
      */
-	protected array $associatedKey = [];
+    protected array $associatedKey = [];
 
-	/**
-	 *
-	 * @var string
-	 */
-	protected $listOf = '';
+    /**
+     *
+     * @var string
+     */
+    protected $listOf = '';
 
     /**
      *
@@ -36,42 +36,46 @@ class EntityList extends Lists implements Iterator
         parent::__construct($items);
     }
 
-	/**
-	 * Set this list of and entity type
-	 *
-	 * @param string $listOf
-	 * @return EntityList
-	 */
-	public function setListOf(string $listOf){
-		$this->listOf = $listOf;
-		return $this;
-	}
+    /**
+     * Set this list of and entity type
+     *
+     * @param string $listOf
+     * @return EntityList
+     */
+    public function setListOf(string $listOf)
+    {
+        $this->listOf = $listOf;
+        return $this;
+    }
 
-	/**
-	 *
-	 * @return string
-	 */
-	public function getListOf(){
-		return $this->listOf;
-	}
+    /**
+     *
+     * @return string
+     */
+    public function getListOf()
+    {
+        return $this->listOf;
+    }
 
-	/**
-	 *
-	 * @param array $associatedKey
-	 * @return EntityList
-	 */
-	public function setAssociatedKey($associatedKey){
-		$this->associatedKey = $associatedKey;
-		return $this;
-	}
+    /**
+     *
+     * @param array $associatedKey
+     * @return EntityList
+     */
+    public function setAssociatedKey($associatedKey)
+    {
+        $this->associatedKey = $associatedKey;
+        return $this;
+    }
 
-	/**
-	 *
-	 * @return array
-	 */
-	public function getAssociatedKey(){
-		return $this->associatedKey;
-	}
+    /**
+     *
+     * @return array
+     */
+    public function getAssociatedKey()
+    {
+        return $this->associatedKey;
+    }
 
     /**
      * Add eloquent obeject
@@ -87,32 +91,6 @@ class EntityList extends Lists implements Iterator
         // }
 
         $this->items[] = $item;
-    }
-
-    /**
-     * Find Data with id
-     *
-     */
-    public function find($id)
-    {
-        return $this->filter(function ($item) use ($id) {
-            return $item->{get_class($item)::$primaryKey} == $id;
-        });
-    }
-
-    /**
-     * Find data except id
-     *
-     */
-    public function except(array $ids)
-    {
-        if (!is_array($ids)) {
-            throw new ListException("IDs must be an array");
-        }
-
-        return $this->filter(function ($item) use ($ids) {
-            return !in_array($item->{get_class($item)::$primaryKey}, $ids);
-        });
     }
 
     /**
@@ -142,8 +120,9 @@ class EntityList extends Lists implements Iterator
             if (!property_exists($item, $columnName)) {
                 throw new ListException("Column '$columnName' is not found");
             }
-            if(!in_array($item->{"get$columnName"}(), $data))
+            if (!in_array($item->{"get$columnName"}(), $data)) {
                 $data[] = $item->{"get$columnName"}();
+            }
         }
         return $data;
     }
@@ -166,7 +145,7 @@ class EntityList extends Lists implements Iterator
     public function unSaved()
     {
         return $this->filter(function ($item) {
-            return empty($item->{get_class($item)::$primaryKey});
+            return empty($item->{'get' . $item->getPrimaryKeyName()}());
         });
     }
 
@@ -177,7 +156,7 @@ class EntityList extends Lists implements Iterator
     public function saved()
     {
         return $this->filter(function ($item) {
-            return !empty($item->{get_class($item)::$primaryKey});
+            return !empty($item->{'get' . $item->getPrimaryKeyName()}());
         });
     }
 
@@ -186,9 +165,10 @@ class EntityList extends Lists implements Iterator
      * @param string $columnName
      *
      */
-    public function sum($columnName){
+    public function sum($columnName)
+    {
         $total = 0;
-        foreach($this->items as $item){
+        foreach ($this->items as $item) {
             $total += $item->{"get$columnName"}();
         }
         return $total;
@@ -199,74 +179,79 @@ class EntityList extends Lists implements Iterator
      * @param string $columnName
      *
      */
-    public function avg($columnName){
+    public function avg($columnName)
+    {
         $total = 0;
-        foreach($this->items as $item){
+        foreach ($this->items as $item) {
             $total += $item->{"get$columnName"}();
         }
         return $total / count($this->items);
     }
 
     /**
-     * Minimal value of field, if $return set 'model' then object model will be returned otherwise value of field
+     * Minimal value of field, if $return set 'object' then object model will be returned otherwise value of field
      * @param string $columnName
-     * @param string $return 'model' / 'field'
+     * @param string $return 'object' / 'field'
      */
-    public function min($columnName, $return = "Model"){
+    public function min($columnName, $return = "object")
+    {
         $min = 0;
         $data = null;
-        foreach($this->items as $item){
-            if(is_null($data)){
+        foreach ($this->items as $item) {
+            if (is_null($data)) {
                 $data = $item;
                 $min = $item->{"get$columnName"}();
                 continue;
             }
 
-            if($item->{"get$columnName"}() < $min){
+            if ($item->{"get$columnName"}() < $min) {
                 $data = $item;
                 $min = $item->{"get$columnName"}();
             }
         }
-        return $return == "model" ? $data : $min;
+        return $return == "object" ? $data : $min;
     }
 
      /**
-     * Maximal value of field, if $return set 'model' then object model will be returned otherwise value of field
+     * Maximal value of field, if $return set 'object' then object model will be returned otherwise value of field
      * @param string $columnName
      */
-    public function max($columnName, $return = "model"){
+    public function max($columnName, $return = "object")
+    {
         $max = 0;
         $data = null;
-        foreach($this->items as $item){
-            if(is_null($data)){
+        foreach ($this->items as $item) {
+            if (is_null($data)) {
                 $data = $item;
                 $max = $item->{"get$columnName"}();
                 continue;
             }
 
-            if($item->{"get$columnName"}() > $max){
+            if ($item->{"get$columnName"}() > $max) {
                 $data = $item;
                 $max = $item->{"get$columnName"}();
             }
         }
-        return $return == "model" ? $data : $max;
+        return $return == "object" ? $data : $max;
     }
 
     /**
      * Get only unique data, data with no duplicate / same Id
      * @return EloquestList
      */
-    public function unique(){
+    public function unique()
+    {
         $keys = [];
         $data = [];
-        foreach($this->items as $item){
-            if(!in_array($item->{get_class($item)::$primaryKey}, $keys)){
-                $keys[] = $item->{get_class($item)::$primaryKey};
+        foreach ($this->items as $item) {
+            if (!in_array($item->{'get' . $item->getPrimaryKeyName()}(), $keys)) {
+                $keys[] = $item->{'get' . $item->getPrimaryKeyName()};
                 $data[] = $item;
             } else {
                 $index = 0;
-                foreach($keys as $key){
-                    if($key == $item->{get_class($item)::$primaryKey});
+                foreach ($keys as $key) {
+                    if ($key == $item->{'get' . $item->getPrimaryKeyName()}()) {
+                    }
                         break;
                     $index++;
                 }
@@ -278,48 +263,53 @@ class EntityList extends Lists implements Iterator
         return $this;
     }
 
-	//+++++++++ Iterator ++++++++++=
+    //+++++++++ Iterator ++++++++++=
 
-	/**
-	 * @inheritDoc
-	 */
-	public function rewind(): void {
+    /**
+     * @inheritDoc
+     */
+    public function rewind(): void
+    {
         $this->position = 0;
     }
 
-	/**
-	 * @inheritDoc
-	 */
-    public function current() {
+    /**
+     * @inheritDoc
+     */
+    public function current()
+    {
 
-		$looper = EntityLooper::getInstance($this->getListOf());
-		if(!$looper->hasEntityList())
-			$looper->setEntityList($this);
+        $looper = EntityLooper::getInstance($this->getListOf());
+        if (!$looper->hasEntityList()) {
+            $looper->setEntityList($this);
+        }
 
-		$isLastIndex = $this->position == count($this->items) - 1;
-		$looper->setIsLastIndex($isLastIndex);
+        $isLastIndex = $this->position == count($this->items) - 1;
+        $looper->setIsLastIndex($isLastIndex);
         return $this->items[$this->position];
     }
 
-	/**
-	 * @inheritDoc
-	 */
-    public function key() {
+    /**
+     * @inheritDoc
+     */
+    public function key()
+    {
         return $this->position;
     }
 
-	/**
-	 * @inheritDoc
-	 */
-    public function next(): void {
+    /**
+     * @inheritDoc
+     */
+    public function next(): void
+    {
         ++$this->position;
     }
 
-	/**
-	 * @inheritDoc
-	 */
-    public function valid(): bool {
+    /**
+     * @inheritDoc
+     */
+    public function valid(): bool
+    {
         return isset($this->items[$this->position]);
     }
-
 }

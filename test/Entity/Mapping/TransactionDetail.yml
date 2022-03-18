@@ -1,0 +1,16 @@
+Ci4OrmTest\Entity\TransactionDetail:
+  table: 'transaction_detail'
+  primaryKey: 'Id'
+  props:
+    Id: 
+      type: 'int'
+      isEntity: false
+    Transaction: 
+      type: 'Ci4OrmTest\Entity\Transaction'
+      isEntity: true
+      foreignKey: 'Transaction_Id'
+      relationType: 'one_to_many'
+      inversedBy: 'TransactionDetails'
+    ItemName: 
+      type: 'string'
+      isEntity: false

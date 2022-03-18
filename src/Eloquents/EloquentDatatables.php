@@ -6,5 +6,4 @@ use Ci4Orm\Libraries\Datatables;
 
 class EloquentDatatables extends Datatables
 {
-
 }

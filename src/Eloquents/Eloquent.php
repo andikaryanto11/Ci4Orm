@@ -26,7 +26,6 @@ use stdClass;
  */
 class Eloquent
 {
-
     /**
      * Database Connection
      *
@@ -147,12 +146,14 @@ class Eloquent
      */
     public function isDirty()
     {
-        if (empty($this->{static::$primaryKey}))
+        if (empty($this->{static::$primaryKey})) {
             return true;
+        }
 
         $clonedData = $this->getOriginalData();
-        if (empty($clonedData))
+        if (empty($clonedData)) {
             return true;
+        }
 
         foreach ($this as $key => $value) {
             if (in_array($key, $this->fields)) {
@@ -236,8 +237,9 @@ class Eloquent
             ]
         ];
         $data = static::findAll($where);
-        if (empty($data))
+        if (empty($data)) {
             return new static(self::$db);
+        }
         return $data[0];
     }
 
@@ -256,8 +258,9 @@ class Eloquent
             ]
         ];
         $data = static::findAll($where);
-        if (count($data) == 0)
+        if (count($data) == 0) {
             throw new DatabaseException("Cannot find data with id:$id");
+        }
         return $data[0];
     }
 
@@ -273,8 +276,9 @@ class Eloquent
     {
 
         $data = static::findAll($filter);
-        if (empty($data))
+        if (empty($data)) {
             return null;
+        }
         return $data[0];
     }
 
@@ -288,8 +292,9 @@ class Eloquent
     {
 
         $data = static::findAll($filter);
-        if (empty($data))
+        if (empty($data)) {
             return new static(self::$db);
+        }
         return $data[0];
     }
 
@@ -304,8 +309,9 @@ class Eloquent
     {
 
         $data = static::findAll($filter);
-        if (empty($data))
+        if (empty($data)) {
             throw new DatabaseException("Cannot find any data");
+        }
         return $data[0];
     }
 
@@ -319,10 +325,11 @@ class Eloquent
     {
         $entity = new static(self::$db);
         $entity->filter = $filter;
-        if ($chunked)
+        if ($chunked) {
             return $entity;
+        }
 
-        $result = $entity->fetch($filter, $returnEntity,  $columns);
+        $result = $entity->fetch($filter, $returnEntity, $columns);
         if (count($result) > 0) {
             return $result;
         }
@@ -338,7 +345,7 @@ class Eloquent
     public static function findAllOrFail(array $filter = [], $returnEntity = true, $columns = [])
     {
         $entity = new static(self::$db);
-        $result = $entity->fetch($filter, $returnEntity,  $columns);
+        $result = $entity->fetch($filter, $returnEntity, $columns);
         if (count($result) > 0) {
             return $result;
         }
@@ -378,18 +385,17 @@ class Eloquent
             $newobject = null;
             if ($type = "entity") {
                 $class = get_class($this);
-                $newobject = new $class;
+                $newobject = new $class();
             } else {
                 $newobject = new stdClass();
             }
 
-            $related = new stdClass;
+            $related = new stdClass();
             $related->ClassName = null;
             $related->Data = null;
             $isFound = false;
 
             foreach ($result as $column => $value) {
-
                 if (!in_array($column, $this->hideFieldValue)) {
                     if ($this->escapeToOutput) {
                         if (!in_array($column, $this->nonEscapedField)) {
@@ -409,7 +415,8 @@ class Eloquent
                 }
             }
 
-            if (!is_null($withRelatedData)) {;
+            if (!is_null($withRelatedData)) {
+                ;
                 foreach ($withRelatedData as $relatedData) {
                     $findRelated = function ($item) use ($newobject, $relatedData) {
                         return $newobject->{$relatedData->ForeignKey} == $item->{get_class($item)::$primaryKey};
@@ -437,19 +444,19 @@ class Eloquent
     {
 
         if (!empty($filter)) {
-            $join = (isset($filter['join']) ? $filter['join'] : FALSE);
-            $where = (isset($filter['where']) ? $filter['where'] : FALSE);
-            $wherein = (isset($filter['whereIn']) ? $filter['whereIn'] : FALSE);
-            $orwherein = (isset($filter['orWhereIn']) ? $filter['orWhereIn'] : FALSE);
-            $orwhere = (isset($filter['orWhere']) ? $filter['orWhere'] : FALSE);
-            $wherenotin = (isset($filter['whereNotIn']) ? $filter['whereNotIn'] : FALSE);
-            $like = (isset($filter['like']) ? $filter['like'] : FALSE);
-            $orlike = (isset($filter['orLike']) ? $filter['orLike'] : FALSE);
-            $notlike = (isset($filter['notLike']) ? $filter['notLike'] : FALSE);
-            $ornotlike = (isset($filter['orNotLike']) ? $filter['orNotLike'] : FALSE);
-            $order = (isset($filter['order']) ? $filter['order'] : FALSE);
-            $limit = (isset($filter['limit']) ? $filter['limit'] : FALSE);
-            $group = (isset($filter['group']) ? $filter['group'] : FALSE);
+            $join = (isset($filter['join']) ? $filter['join'] : false);
+            $where = (isset($filter['where']) ? $filter['where'] : false);
+            $wherein = (isset($filter['whereIn']) ? $filter['whereIn'] : false);
+            $orwherein = (isset($filter['orWhereIn']) ? $filter['orWhereIn'] : false);
+            $orwhere = (isset($filter['orWhere']) ? $filter['orWhere'] : false);
+            $wherenotin = (isset($filter['whereNotIn']) ? $filter['whereNotIn'] : false);
+            $like = (isset($filter['like']) ? $filter['like'] : false);
+            $orlike = (isset($filter['orLike']) ? $filter['orLike'] : false);
+            $notlike = (isset($filter['notLike']) ? $filter['notLike'] : false);
+            $ornotlike = (isset($filter['orNotLike']) ? $filter['orNotLike'] : false);
+            $order = (isset($filter['order']) ? $filter['order'] : false);
+            $limit = (isset($filter['limit']) ? $filter['limit'] : false);
+            $group = (isset($filter['group']) ? $filter['group'] : false);
 
             if ($join) {
                 foreach ($join as $key => $vv) {
@@ -462,58 +469,68 @@ class Eloquent
                     }
                 }
             }
-            if ($where)
+            if ($where) {
                 $this->builder->where($where);
+            }
 
-            if ($orwhere)
+            if ($orwhere) {
                 $this->builder->orWhere($orwhere);
+            }
 
             if ($wherein) {
                 foreach ($wherein as $key => $v) {
-                    if (!empty($v))
+                    if (!empty($v)) {
                         $this->builder->whereIn($key, $v);
+                    }
                 }
             }
 
             if ($orwherein) {
                 foreach ($orwherein as $key => $v) {
-                    if (!empty($v))
+                    if (!empty($v)) {
                         $this->builder->orWhereIn($key, $v);
+                    }
                 }
             }
 
             if ($wherenotin) {
                 foreach ($wherenotin as $key => $v) {
-                    if (!empty($v))
+                    if (!empty($v)) {
                         $this->builder->whereNotIn($key, $v);
+                    }
                 }
             }
 
 
-            if ($like)
+            if ($like) {
                 $this->builder->like($like);
+            }
 
-            if ($orlike)
+            if ($orlike) {
                 $this->builder->orLike($orlike);
+            }
 
             if ($orlike) {
                 foreach ($orlike as $key => $v) {
-                    if (!empty($v))
+                    if (!empty($v)) {
                         $this->builder->orLike($key, $v);
+                    }
                 }
             }
 
             if ($notlike) {
                 foreach ($notlike as $key => $v) {
-                    if (!empty($v))
+                    if (!empty($v)) {
                         $this->builder->notLike($key, $v);
+                    }
                 }
             }
 
             if ($ornotlike) {
                 foreach ($ornotlike as $key => $v) {
-                    if (!empty($v))
+                    if (!empty($v)) {
                         $this->builder->orNotLike($key, $v);
+                    }
                 }
             }
 
@@ -536,13 +553,15 @@ class Eloquent
 
             if ($order) {
                 foreach ($order as $key => $v) {
-                    if (!empty($v))
+                    if (!empty($v)) {
                         $this->builder->orderBy($key, $v);
+                    }
                 }
             }
 
-            if ($limit)
+            if ($limit) {
                 $this->builder->limit($limit['size'], ($limit['page'] - 1) *  $limit['size']);
+            }
         }
     }
 
@@ -564,7 +583,6 @@ class Eloquent
         $results = null;
         $withRelated = null;
         if ($returnEntity) {
-
             if (empty($columns)) {
                 $fields = static::getProperties();
                 $imploded = implode("," . $this->table . ".", $fields);
@@ -575,15 +593,17 @@ class Eloquent
                 $results = $this->builder->select($imploded)->get()->getResult();
             }
 
-            if (!empty($this->relatedClass))
+            if (!empty($this->relatedClass)) {
                 $withRelated = $this->fetchRelatedData($results);
+            }
             // echo json_encode($withRelated);
             $result = $this->setToEntity($results, "entity", $withRelated);
         } else {
             $imploded = implode(",", $columns);
             $results = $this->builder->select($imploded)->get()->getResult();
-            if (!empty($this->relatedClass))
+            if (!empty($this->relatedClass)) {
                 $withRelated = $this->fetchRelatedData($results);
+            }
             $result = $this->setToEntity($results, "stdClass", $withRelated);
         }
 
@@ -739,12 +759,14 @@ class Eloquent
      */
     public function delete()
     {
-        if (empty($this->{static::$primaryKey}))
+        if (empty($this->{static::$primaryKey})) {
             throw new DatabaseException("Couldn't Find Any Data To Delete");
+        }
 
         $this->builder->where(static::$primaryKey, $this->{static::$primaryKey});
-        if (!$this->builder->delete())
+        if (!$this->builder->delete()) {
             return false;
+        }
 
         $this->{static::$primaryKey} = null;
         return true;
@@ -792,7 +814,7 @@ class Eloquent
         if (!is_null($result)) {
             return $result;
         }
-        return new $relatedEloquent;
+        return new $relatedEloquent();
     }
 
     /**
@@ -875,8 +897,6 @@ class Eloquent
         }
 
         if (!empty($this->{static::$primaryKey})) {
-
-
             if (isset($params['where'])) {
                 $params['where'][$foreignKey] = $this->{static::$primaryKey};
             } else {
@@ -907,8 +927,6 @@ class Eloquent
         }
 
         if (!empty($this->{static::$primaryKey})) {
-
-
             if (isset($params['where'])) {
                 $params['where'][$foreignKey] = $this->{static::$primaryKey};
             } else {
@@ -942,8 +960,6 @@ class Eloquent
         }
 
         if (!empty($this->{static::$primaryKey})) {
-
-
             if (isset($params['where'])) {
                 $params['where'][$foreignKey] = $this->{static::$primaryKey};
             } else {
@@ -956,7 +972,7 @@ class Eloquent
                 return $result[0];
             }
         }
-        return new $relatedEloquent;
+        return new $relatedEloquent();
     }
 
     /**
@@ -974,7 +990,8 @@ class Eloquent
         if (!is_null($result)) {
             return $result;
         }
-        throw new DatabaseException("Cannot find any data");;
+        throw new DatabaseException("Cannot find any data");
+        ;
     }
 
     /**
@@ -1058,8 +1075,9 @@ class Eloquent
             ]
         ];
 
-        if (static::remove($params))
+        if (static::remove($params)) {
             return true;
+        }
 
         throw new DatabaseException("Something went wrong while deleting the data");
     }
@@ -1072,8 +1090,9 @@ class Eloquent
     {
         $instance = static::newInstance();
         $instance->setFilters($params);
-        if ($instance->builder->delete())
+        if ($instance->builder->delete()) {
             return true;
+        }
         return false;
     }
 
@@ -1084,8 +1103,9 @@ class Eloquent
      */
     public static function removeOrError(array $params)
     {
-        if (static::remove($params))
+        if (static::remove($params)) {
             return true;
+        }
         throw new DatabaseException("Something went wrong while deleting the data");
     }
 
