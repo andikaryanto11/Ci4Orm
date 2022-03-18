@@ -17,4 +17,12 @@ interface IEntity
      * @return string
      */
     public function getTableName();
+
+    /**
+     * Get all field Props
+     *
+     * @return array
+     */
+    public function getProps();
+
 }

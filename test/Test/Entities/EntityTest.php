@@ -34,4 +34,10 @@ class EntityTest extends TestCase
         $primaryKey = $this->entity->getTableName();
         expect($primaryKey)->toEqual('transaction');
     }
+
+    public function testGetProps()
+    {
+        $props = $this->entity->getProps();
+        expect(count($props))->toEqual(3);
+    }
 }

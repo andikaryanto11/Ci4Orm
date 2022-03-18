@@ -41,6 +41,14 @@ class Entity implements IEntity
     /**
      * @inheritDoc
      */
+    public function getProps()
+    {
+        return $this->props['props'];
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getTableName()
     {
         return $this->props['table'];

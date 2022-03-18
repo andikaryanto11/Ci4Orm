@@ -128,7 +128,8 @@ class EntityManager
     private function createArray()
     {
         $entityAsArray = [];
-        foreach ($this->props['props'] as $key => $prop) {
+        $props = $this->entity->getProps();
+        foreach ($props as $key => $prop) {
             $getFunction = 'get' . $key;
             $primaryKey = 'get' . $this->primaryKey;
             if (!$prop['isEntity']) {
