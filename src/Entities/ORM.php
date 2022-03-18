@@ -2,6 +2,8 @@
 
 namespace Ci4Orm\Entities;
 
+use Symfony\Component\Yaml\Yaml;
+use Config\Entity;
 
 class ORM
 {
@@ -74,8 +76,21 @@ class ORM
 	 *
 	 * @return array
 	 */
-    public static function parse(string $patToDir = null)
+    public static function parse()
     {
-        return MappingReader::read($patToDir);
+        $result = array();
+        $dir = Entity::register();
+        $cdir = scandir($dir);
+        foreach ($cdir as $key => $value) {
+            if (!in_array($value, array(".", ".."))) {
+                if (!is_dir($dir . DIRECTORY_SEPARATOR . $value)) {
+                    $fileRead = Yaml::parseFile($dir . DIRECTORY_SEPARATOR . $value);
+                    foreach($fileRead as $key => $allProps){
+						$result[$key] = $allProps;
+					}
+                }
+            }
+        }
+        return $result;
     }
 }

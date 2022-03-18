@@ -316,7 +316,8 @@ class Repository implements IRepository
 
 		if (empty($columns)) {
 			$imploded = implode(",", $this->selectColumns);
-			$results = $this->builder->select()->get()->getResult();
+			$resultInterface =  $this->builder->select()->get();
+			$results = $resultInterface->getResult();
 		} else {
 			$fields = $columns;
 			$imploded = implode(",", $fields);
