@@ -24,5 +24,4 @@ interface IEntity
      * @return array
      */
     public function getProps();
-
 }
