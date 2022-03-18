@@ -17,15 +17,33 @@ class Entity implements IEntity
     public array $constraints = [];
 
     /**
+     *
+     * @var array
+     */
+    protected array $props;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
+        $this->props = ORM::getProps(get_class($this));
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getPrimaryKeyName()
     {
-        return ORM::getProps(get_class($this))['primaryKey'];
+        return $this->props['primaryKey'];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTableName()
+    {
+        return $this->props['table'];
     }
 
     public function __call($name, $arguments)

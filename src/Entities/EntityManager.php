@@ -65,9 +65,8 @@ class EntityManager
     public function setEntity(IEntity $entity)
     {
         $this->entity = $entity;
-        $this->props = ORM::getProps(get_class($entity));
-        $this->primaryKey = $this->props['primaryKey'];
-        $this->builder = $this->db->table($this->props['table']);
+        $this->primaryKey = $this->entity->getPrimaryKeyName();
+        $this->builder = $this->db->table($this->entity->getTableName());
         return $this;
     }
 

@@ -13,15 +13,25 @@ class EntityTest extends TestCase
      */
     protected Transaction $entity;
 
-    public function testGetPrimaryKeyName()
+    public function setUp(): void
     {
-
         $configEntity = Mockery::mock('alias:\Config\Entity');
         $configEntity->shouldReceive('register')->andReturn('test/Entity/Mapping');
 
-        $entity = new Transaction();
-        $primaryKey = $entity->getPrimaryKeyName();
+        $this->entity = new Transaction();
+    }
+
+    public function testGetPrimaryKeyName()
+    {
+
+        $primaryKey = $this->entity->getPrimaryKeyName();
 
         expect($primaryKey)->toEqual('Id');
+    }
+
+    public function testGetTableName()
+    {
+        $primaryKey = $this->entity->getTableName();
+        expect($primaryKey)->toEqual('transaction');
     }
 }
