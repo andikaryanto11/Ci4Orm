@@ -7,7 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.4",
-        "fzaninotto/faker": "1.9.2",
+        "fzaninotto/faker": "^1.9.2",
         "symfony/yaml": "^5.4"
     },
     "require-dev": {
