@@ -165,9 +165,9 @@ class Entity implements IEntity
             }
             return call_user_func_array([$this, $name], []);
         } else {
-			$entityUnit = EntityUnit::getInstance();
-			$entityUnit->addEntity($this);
-        	return call_user_func_array([$this, $name], $arguments);
-		}
+            $entityUnit = EntityUnit::getInstance();
+            $entityUnit->addEntity($this);
+            return call_user_func_array([$this, $name], $arguments);
+        }
     }
 }

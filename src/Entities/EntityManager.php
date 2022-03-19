@@ -151,12 +151,12 @@ class EntityManager
                     }
                 }
             } else {
-				if(isset($prop['foreignKey'])){
-					$relatedEntity = ORM::getProps($prop['type']);
-					$relatedPrimaryKey = $relatedEntity['primaryKey'];
-					$getPrimaryKey = 'get' . $relatedPrimaryKey;
-					$entityAsArray[$prop['foreignKey']] = $this->entity->$getFunction()->$getPrimaryKey();
-				}
+                if (isset($prop['foreignKey'])) {
+                    $relatedEntity = ORM::getProps($prop['type']);
+                    $relatedPrimaryKey = $relatedEntity['primaryKey'];
+                    $getPrimaryKey = 'get' . $relatedPrimaryKey;
+                    $entityAsArray[$prop['foreignKey']] = $this->entity->$getFunction()->$getPrimaryKey();
+                }
             }
         }
         return $entityAsArray;
