@@ -2,6 +2,7 @@
 
 namespace Ci4Orm\Entities;
 
+use Ci4Common\Libraries\DbtransLib;
 use Ci4Orm\Interfaces\IEntity;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\BaseConnection;
@@ -22,8 +23,8 @@ class EntityManager
     protected IEntity $entity;
 
     /**
-    * @var BaseConnection $db
-    */
+     * @var BaseConnection $db
+     */
     protected BaseConnection $db;
 
     /**
@@ -62,7 +63,7 @@ class EntityManager
      * @param IEntity $entity
      * @return EntityManager
      */
-    public function setEntity(IEntity $entity)
+    private function setEntity(IEntity $entity)
     {
         $this->entity = $entity;
         $this->primaryKey = $this->entity->getPrimaryKeyName();
@@ -71,12 +72,43 @@ class EntityManager
     }
 
     /**
+     * Start transactional database
+     *
+     * @return void
+     */
+    public function beginTransaction()
+    {
+        DbtransLib::beginTransaction();
+    }
+
+    /**
+     * Rollback transactional database
+     *
+     * @return void
+     */
+    public function rollback()
+    {
+        DbtransLib::rollback();
+    }
+
+    /**
+     * Commit transactional database
+     *
+     * @return void
+     */
+    public function commit()
+    {
+        DbtransLib::commit();
+    }
+
+    /**
      * Persist data to storage
      *
      * @return bool
      */
-    public function persist()
+    public function persist(IEntity $entity)
     {
+        $this->setEntity($entity);
         $primaryKey = 'get' . $this->primaryKey;
         $primaryValue = $this->entity->$primaryKey();
         if (empty($primaryValue) || is_null($primaryValue)) {
@@ -88,14 +120,14 @@ class EntityManager
     }
 
     /**
-      * Update data
+     * Update data
      * @return bool
      */
     private function update()
     {
         $data = $this->createArray();
         $getPrimaryKey = "get" . $this->primaryKey;
-        $this->builder->where($this->primaryKey, $this->entity->$getPrimaryKey());
+        $this->builder->where($this->primaryKey, $this->entity->{$getPrimaryKey}());
         if ($this->builder->update($data)) {
             return true;
         }
@@ -118,6 +150,27 @@ class EntityManager
         }
 
         return false;
+    }
+
+    /**
+     * Remove data from table
+     *
+     * @param IEntity $entity
+     * @return bool
+     */
+    public function remove(IEntity $entity)
+    {
+
+        $this->setEntity($entity);
+        $getPrimaryKey = "get" . $this->primaryKey;
+        $this->builder->where($this->primaryKey, $this->entity->{$getPrimaryKey}());
+        if (!$this->builder->delete()) {
+            return false;
+        }
+
+        $setPrimaryKey = "set" . $this->primaryKey;
+        $this->entity->{$setPrimaryKey}(0);
+        return true;
     }
 
     /**

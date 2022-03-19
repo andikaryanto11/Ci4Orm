@@ -10,53 +10,29 @@ use Exception;
 class EntityUnit
 {
     /**
-     *
-     * @var EntityUnit|null
-     */
-    private static ?EntityUnit $instance = null;
-
-    /**
-     *
-     * @var array
-     */
-    private array $entities = [];
-
-    private function __construct()
-    {
-    }
-
-    /**
-     *
-     * @return EntityUnit
-     */
-    public static function getInstance()
-    {
-        if (is_null(static::$instance)) {
-            static::$instance = new static();
-        }
-
-        return static::$instance;
-    }
-
-    /**
-     * Add entity that will be persisted
+     * Prepare entity that will be persisted. Will persisted after entity unit flush
      *
      * @param IEntity $entity
-     * @return void
+     * @return EntityManager
      */
-    public function addEntity(IEntity $entity)
+    public function preparePersistence(IEntity $entity)
     {
-        $isEntityExist = false;
-        foreach ($this->entities as $existedEntity) {
-            if ($entity === $existedEntity) {
-                $isEntityExist = true;
-                break;
-            }
-        }
+        $entityUnit = EntityScope::getInstance();
+        $entityUnit->addEntity(EntityScope::PERFORM_ADD_UPDATE, $entity);
+        return $this;
+    }
 
-        if (!$isEntityExist) {
-            $this->entities[] = $entity;
-        }
+    /**
+     * Prepare entity that will be removed. Will removed after entity unit flush
+     *
+     * @param IEntity $entity
+     * @return EntityManager
+     */
+    public function prepareRemove(IEntity $entity)
+    {
+        $entityUnit = EntityScope::getInstance();
+        $entityUnit->addEntity(EntityScope::PERFORM_DELETE, $entity);
+        return $this;
     }
 
     /**
@@ -66,16 +42,28 @@ class EntityUnit
      */
     public function flush()
     {
-        DbtransLib::beginTransaction();
+        $entityScope = EntityScope::getInstance();
+
+        $entityManager = new EntityManager();
+        $entityManager->beginTransaction();
+
         try {
-            $entityManager = new EntityManager();
-            foreach ($this->entities as $entity) {
-                $entityManager->setEntity($entity)->persist();
+            $entityScope->sort();
+            foreach ($entityScope->getEntities() as $key => $indexValue) {
+                if ($key == EntityScope::PERFORM_ADD_UPDATE) {
+                    foreach ($indexValue as $entity) {
+                        $entityManager->persist($entity);
+                    }
+                } else {
+                    foreach ($indexValue as $entity) {
+                        $entityManager->remove($entity);
+                    }
+                }
             }
-            DbtransLib::commit();
-            $this->entities = [];
+            $entityManager->commit();
+            $entityScope->clean();
         } catch (Exception $e) {
-            DbtransLib::rollback();
+            $entityManager->rollback();
             throw $e;
         }
     }
