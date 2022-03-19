@@ -13,7 +13,7 @@ class EntityUnit
      * Prepare entity that will be persisted. Will persisted after entity unit flush
      *
      * @param IEntity $entity
-     * @return EntityManager
+     * @return EntityUnit
      */
     public function preparePersistence(IEntity $entity)
     {
@@ -26,7 +26,7 @@ class EntityUnit
      * Prepare entity that will be removed. Will removed after entity unit flush
      *
      * @param IEntity $entity
-     * @return EntityManager
+     * @return EntityUnit
      */
     public function prepareRemove(IEntity $entity)
     {
