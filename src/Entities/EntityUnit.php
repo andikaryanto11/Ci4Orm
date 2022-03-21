@@ -49,22 +49,19 @@ class EntityUnit
 
         try {
             $entityScope->sort();
-            foreach ($entityScope->getEntities() as $key => $indexValue) {
-                if ($key == EntityScope::PERFORM_ADD_UPDATE) {
-                    foreach ($indexValue as $entity) {
-                        $entityManager->persist($entity);
-                    }
-                } else {
-                    foreach ($indexValue as $entity) {
-                        $entityManager->remove($entity);
-                    }
+            foreach ($entityScope->getEntities() as $value) {
+                if ($value['perform'] == EntityScope::PERFORM_ADD_UPDATE) {
+                    $entityManager->persist($value['entity']);
+                } elseif ($value['perform'] == EntityScope::PERFORM_DELETE) {
+                    $entityManager->remove($value['entity']);
                 }
             }
             $entityManager->commit();
             $entityScope->clean();
         } catch (Exception $e) {
             $entityManager->rollback();
+            $entityScope->clean();
             throw $e;
         }
     }
-}
+}   

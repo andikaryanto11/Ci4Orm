@@ -53,7 +53,6 @@ class EntityManager
 
     public function __construct()
     {
-
         $this->db = \Config\Database::connect();
     }
 
