@@ -51,9 +51,9 @@ class EntityScope
     public function addEntity(string $perfom, IEntity $entity)
     {
         $isEntityExist = false;
-        if (isset($this->entities[$perfom])) {
-            foreach ($this->entities[$perfom] as $existedEntity) {
-                if ($entity === $existedEntity) {
+        if (isset($this->entities)) {
+            foreach ($this->entities as $existedEntity) {
+                if ($entity === $existedEntity['entity'] && $perfom === $entity['perform']) {
                     $isEntityExist = true;
                     break;
                 }
@@ -61,7 +61,10 @@ class EntityScope
         }
 
         if (!$isEntityExist) {
-            $this->entities[$perfom][] = $entity;
+            $this->entities[] = [
+                'perform' => $perfom,
+                'entity' => $entity
+            ];
         }
     }
 

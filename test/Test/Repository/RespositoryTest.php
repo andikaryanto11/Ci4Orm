@@ -141,7 +141,11 @@ class RespositoryTest extends TestCase
         $this->builder->shouldReceive('where')->with(['Id' => 1])->andReturn($this->builder);
         $this->resultInterface->shouldReceive('getResult')->andReturn([$Transaction, $Transaction2]);
 
-        $entities = $this->repository->findOne();
+        $entities = $this->repository->findOne([
+            'where' => [
+                "Id" => 1
+            ]
+        ]);
         expect($entities)->toBeInstanceOf(Transaction::class);
         expect($entities->getId())->toEqual(1);
     }
