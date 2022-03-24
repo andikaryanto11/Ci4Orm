@@ -50,7 +50,7 @@ class EntityUnitTest extends TestCase
         $entityScope->addEntity(EntityScope::PERFORM_DELETE, $transaction1);
 
         $this->baseBuilder->shouldReceive('where')->once()->with('Id', 1)->andReturn($this->baseBuilder);
-        $this->baseBuilder->shouldReceive('delete')->andReturn(true);
+        $this->baseBuilder->shouldReceive('delete')->once()->andReturn(true);
 
         $return = $this->entityUnit->flush();
 
@@ -70,12 +70,13 @@ class EntityUnitTest extends TestCase
         $entityScope->addEntity(EntityScope::PERFORM_ADD_UPDATE, $transaction2);
 
 
-        $this->baseBuilder->shouldReceive('set')->andReturn($this->baseBuilder);
-        $this->baseBuilder->shouldReceive('insert')->andReturn($this->baseResult);
-        $this->baseConnection->shouldReceive('insertID')->andReturn(1, 2);
+        $this->baseBuilder->shouldReceive('set')->twice()->andReturn($this->baseBuilder);
+        $this->baseBuilder->shouldReceive('insert')->twice()->andReturn($this->baseResult);
+        $this->baseConnection->shouldReceive('insertID')->twice()->andReturn(1, 2);
 
         $return = $this->entityUnit->flush();
-
+        expect($transaction1->getId())->toEqual(1);
+        expect($transaction2->getId())->toEqual(2);
         expect($return)->toBeNull();
     }
 
