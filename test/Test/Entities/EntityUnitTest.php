@@ -26,13 +26,18 @@ class EntityUnitTest extends TestCase
         $configDatabase = Mockery::mock('alias:\Config\Database');
         $this->entityManager = Mockery::mock(EntityManager::class);
 
-        $this->baseConnection->shouldReceive('table')->twice()->andReturn($this->baseBuilder);
+        $this->baseConnection->shouldReceive('table')->once()->andReturn($this->baseBuilder);
         $configDatabase->shouldReceive('connect')->andReturn($this->baseConnection);
         $DbtransLib->shouldReceive('beginTransaction')->once();
         $DbtransLib->shouldReceive('commit')->once();
 
         $configEntity->shouldReceive('register')->andReturn('test/Entity/Mapping');
 
+        $this->baseBuilder->shouldReceive('set')->andReturn($this->baseBuilder);
+        $this->baseBuilder->shouldReceive('insert')->andReturn($this->baseResult);
+        $this->baseBuilder->shouldReceive('where')->once()->with('Id', 1)->andReturn($this->baseBuilder);
+        $this->baseBuilder->shouldReceive('delete')->andReturn(true);
+        $this->baseConnection->shouldReceive('insertID')->andReturn(1, 2);
         $this->entityManager->shouldReceive('beginTransaction')->once();
         $this->entityManager->shouldReceive('commit')->once();
 
@@ -48,10 +53,6 @@ class EntityUnitTest extends TestCase
 
         $entityScope = EntityScope::getInstance();
         $entityScope->addEntity(EntityScope::PERFORM_DELETE, $transaction1);
-
-        $this->baseBuilder->shouldReceive('where')->once()->with('Id', 1)->andReturn($this->baseBuilder);
-        $this->baseBuilder->shouldReceive('delete')->andReturn(true);
-        // $this->baseConnection->shouldReceive('insertID')->andReturn(1, 2);
 
         $return = $this->entityUnit->flush();
 
@@ -69,11 +70,6 @@ class EntityUnitTest extends TestCase
         $entityScope = EntityScope::getInstance();
         $entityScope->addEntity(EntityScope::PERFORM_ADD_UPDATE, $transaction1);
         $entityScope->addEntity(EntityScope::PERFORM_ADD_UPDATE, $transaction2);
-
-
-        $this->baseBuilder->shouldReceive('set')->andReturn($this->baseBuilder);
-        $this->baseBuilder->shouldReceive('insert')->andReturn($this->baseResult);
-        $this->baseConnection->shouldReceive('insertID')->andReturn(1, 2);
 
         $return = $this->entityUnit->flush();
 
