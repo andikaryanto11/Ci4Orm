@@ -179,6 +179,19 @@ class Repository implements IRepository
     }
 
     /**
+     * Will fetch array of stdClass.
+     *
+     * @param array $filter
+     * @param array $columns
+     * @return array
+     *
+     */
+    public function all(array $filter = [], $columns = [])
+    {
+        return $this->fetch($filter, $columns, true);
+    }
+
+    /**
      * set filter to query builder
      *
      * @param array $filter
@@ -315,7 +328,7 @@ class Repository implements IRepository
      * @param array $columns
      * @return array
      */
-    private function fetch(array $filter = [], $columns = [], &$associated = [])
+    private function fetch(array $filter = [], $columns = [], $stdClass = false, &$associated = [])
     {
 
         $this->setFilters($filter);
@@ -335,9 +348,14 @@ class Repository implements IRepository
             $results = $this->builder->select($imploded)->get()->getResult();
         }
 
-        $result = $this->setToEntity($results, $associated);
+        $finalResults = null;
+        if (!$stdClass) {
+            $finalResults = $this->setToEntity($results, $associated);
+        } else {
+            $finalResults = $results;
+        }
 
-        return $result;
+        return $finalResults;
     }
 
     /**
@@ -397,7 +415,7 @@ class Repository implements IRepository
     public function collect($filter = [])
     {
         $associated = [];
-        $result = $this->fetch($filter, [], $associated);
+        $result = $this->fetch($filter, [], false, $associated);
         $entityList = new EntityList($result);
         $entityList->setListOf($this->entityClass);
         $entityList->setAssociatedKey($associated);
@@ -407,18 +425,18 @@ class Repository implements IRepository
     /**
      * @inheritDoc
      */
-    public function count($filter)
+    public function count($filter = [])
     {
-        $result = $this->findAll($filter);
+        $result = $this->all($filter);
         return empty($result) ? 0 : count($result);
     }
 
     /**
      * @inheritDoc
      */
-    public static function datatables($filter = [], $returnEntity = true, $useIndex = true)
+    public function datatables($filter = [], $returnEntity = true, $useIndex = true)
     {
-        $datatables = new Datatables($filter, $returnEntity, $useIndex, static::class);
+        $datatables = new RepositoryDatatables($filter, $returnEntity, $useIndex, $this);
         return $datatables;
     }
 }

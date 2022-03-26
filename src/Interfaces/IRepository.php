@@ -39,15 +39,15 @@ interface IRepository
     /**
      * Find data by filter value
      *
-     * @param  array $filter
-     * @return IEntity|null
+     * @param  ?array $filter
+     * @return ?IEntity|null
      */
     public function findOne($filter = []);
 
     /**
      * Find data by filter value or throw error
      *
-     * @param  array $filter
+     * @param  ?array $filter
      * @return IEntity|null
      * @throws DatabaseException
      */
@@ -56,22 +56,22 @@ interface IRepository
     /**
      * Find data by filter value or new entity
      *
-     * @param  array $filter
+     * @param  ?array $filter
      */
-    public function findOneOrNew($filter);
+    public function findOneOrNew($filter = []);
 
     /**
      * Colect data by filter
      *
-     * @param  array $filter
-     * @return  IEntity[]|null
+     * @param  ?array $filter
+     * @return  ?IEntity[]|null
      */
     public function findAll(array $filter = [], $columns = []);
 
     /**
      * Colect data by filter
      *
-     * @param  array $filter
+     * @param  ?array $filter
      * @return  EntityList
      */
     public function collect($filter = []);
@@ -79,10 +79,10 @@ interface IRepository
     /**
      * Find data by filter value
      *
-     * @param  array $filter
+     * @param ?array $filter
      * @return int
      */
-    public function count($filter);
+    public function count($filter = []);
 
     /**
      * Get datatables server side  results array
@@ -92,5 +92,5 @@ interface IRepository
      * @param boolean $useIndex set to false if datatables in front end use column name
      * @return Datatables
      */
-    public static function datatables($filter = [], $returnEntity = true, $useIndex = true);
+    public function datatables($filter = [], $returnEntity = true, $useIndex = true);
 }

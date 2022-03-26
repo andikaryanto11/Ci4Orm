@@ -36,7 +36,7 @@ jobs:
       run: composer install --prefer-dist --no-progress
     
     - name: Run All Unit Test
-      run: vendor/bin/phpunit test
+      run: ./vendor/bin/phpunit test
 
     - name: PHP standart code 
       run: ./vendor/bin/phpcbf --standard=PSR12 src/ test/

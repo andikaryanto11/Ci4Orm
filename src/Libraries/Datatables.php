@@ -25,11 +25,11 @@ class Datatables
     /**
      * @var bool
      */
-    protected $isEloquent = false;
+    protected $isModel = false;
     /**
-     * @var string Eloquent class
+     * @var mixed
      */
-    protected $eloquent;
+    protected $model;
 
     /**
      * @var string
@@ -81,12 +81,12 @@ class Datatables
         'data'            => null,
     ];
 
-    public function __construct($filter = [], $returnEntity = true, $useIndex = true, $eloquent = null)
+    public function __construct($filter = [], $returnEntity = true, $useIndex = true, $model = null)
     {
         $this->request = \Config\Services::request();
 
-        $this->eloquent  = $eloquent;
-        $this->isEloquent = $this->returnEntity ? true : false;
+        $this->model  = $model;
+        $this->isModel = $this->returnEntity ? true : false;
 
         if (!empty($filter)) {
             $this->filter = $filter;
@@ -108,7 +108,7 @@ class Datatables
 
 
     /**
-     * Set post parameter to eloquent fetch function parameter
+     * Set post parameter to model fetch function parameter
      */
     public function setParams()
     {
@@ -219,7 +219,7 @@ class Datatables
     {
         try {
             $params = $this->setParams();
-            $result = $this->eloquent::findAll($params, $this->returnEntity, $this->getColumnsOnly());
+            $result = $this->model::findAll($params, $this->returnEntity, $this->getColumnsOnly());
 
             $this->output['draw']            = !empty($this->request->getPost('draw')) ? intval($this->request->getPost('draw')) : 0;
             $this->output['recordsTotal']    = intval(count($result));
@@ -249,7 +249,7 @@ class Datatables
             'orLike'     => isset($filter['orLike']) ? $filter['orLike'] : null,
             'group'      => isset($filter['group']) ? $filter['group'] : null,
         ];
-        return $this->eloquent::count($params, $this->returnEntity, $this->getColumnsOnly());
+        return $this->model::count($params, $this->returnEntity, $this->getColumnsOnly());
     }
 
     /**
@@ -390,7 +390,7 @@ class Datatables
     /**
      * Collect all columns to select in database query
      */
-    private function getColumnsOnly()
+    public function getColumnsOnly()
     {
         $columns = [];
         foreach ($this->column as $column) {
