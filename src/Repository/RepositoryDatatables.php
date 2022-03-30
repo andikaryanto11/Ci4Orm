@@ -101,7 +101,7 @@ class RepositoryDatatables extends Datatables
     {
         try {
             $params = $this->setParams();
-            $result = $this->model->collect($params, $this->getColumnsOnly());
+            $result = $this->model->collect($params);
 
             $this->output['draw']            = !empty($this->request->getPost('draw')) ? intval($this->request->getPost('draw')) : 0;
             $this->output['recordsTotal']    = intval(count($result));

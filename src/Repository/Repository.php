@@ -333,19 +333,15 @@ class Repository implements IRepository
 
         $this->setFilters($filter);
 
-        $result = null;
-        $fields = [];
-        $imploded = null;
         $results = null;
 
         if (empty($columns)) {
-            $imploded = implode(",", $this->selectColumns);
-            $resultInterface =  $this->builder->select()->get();
+            $selectColumns = implode(",", $this->selectColumns);
+            $resultInterface =  $this->builder->select($selectColumns)->get();
             $results = $resultInterface->getResult();
         } else {
-            $fields = $columns;
-            $imploded = implode(",", $fields);
-            $results = $this->builder->select($imploded)->get()->getResult();
+            $selectColumns = implode(",", $columns);
+            $results = $this->builder->select($selectColumns)->get()->getResult();
         }
 
         $finalResults = null;
@@ -412,10 +408,10 @@ class Repository implements IRepository
     /**
      * @inheritDoc
      */
-    public function collect($filter = [])
+    public function collect($filter = [], $columns = [])
     {
         $associated = [];
-        $result = $this->fetch($filter, [], false, $associated);
+        $result = $this->fetch($filter, $columns, false, $associated);
         $entityList = new EntityList($result);
         $entityList->setListOf($this->entityClass);
         $entityList->setAssociatedKey($associated);
