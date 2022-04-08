@@ -27,6 +27,8 @@ class EntityUnitTest extends TestCase
         $this->entityManager = Mockery::mock(EntityManager::class);
 
         $this->baseConnection->shouldReceive('table')->andReturn($this->baseBuilder);
+        $this->baseConnection->shouldReceive('transStart')->andReturn($this->baseBuilder);
+        $this->baseConnection->shouldReceive('commit')->andReturn($this->baseBuilder);
         $configDatabase->shouldReceive('connect')->andReturn($this->baseConnection);
         $DbtransLib->shouldReceive('beginTransaction');
         $DbtransLib->shouldReceive('commit');

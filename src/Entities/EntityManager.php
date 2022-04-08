@@ -77,7 +77,7 @@ class EntityManager
      */
     public function beginTransaction()
     {
-        DbtransLib::beginTransaction();
+        $this->db->transStart();
     }
 
     /**
@@ -87,7 +87,7 @@ class EntityManager
      */
     public function rollback()
     {
-        DbtransLib::rollback();
+        $this->db->rollback();
     }
 
     /**
@@ -97,7 +97,7 @@ class EntityManager
      */
     public function commit()
     {
-        DbtransLib::commit();
+        $this->db->commit();
     }
 
     /**
