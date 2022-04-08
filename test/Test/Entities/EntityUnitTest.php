@@ -19,7 +19,6 @@ class EntityUnitTest extends TestCase
     public function setUp(): void
     {
         $configEntity = Mockery::mock('alias:\Config\Entity');
-        $DbtransLib = Mockery::mock('alias:\Ci4Common\Libraries\DbtransLib');
         $this->baseConnection = Mockery::mock('alias:\CodeIgniter\Database\BaseConnection');
         $this->baseBuilder = Mockery::mock('alias:\CodeIgniter\Database\BaseBuilder');
         $this->baseResult = Mockery::mock('alias:\CodeIgniter\Database\BaseResult');
@@ -30,8 +29,6 @@ class EntityUnitTest extends TestCase
         $this->baseConnection->shouldReceive('transStart')->andReturn($this->baseBuilder);
         $this->baseConnection->shouldReceive('commit')->andReturn($this->baseBuilder);
         $configDatabase->shouldReceive('connect')->andReturn($this->baseConnection);
-        $DbtransLib->shouldReceive('beginTransaction');
-        $DbtransLib->shouldReceive('commit');
 
         $configEntity->shouldReceive('register')->andReturn('test/Entity/Mapping');
 

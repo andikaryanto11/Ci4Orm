@@ -2,12 +2,10 @@
 
 namespace Ci4Orm\Entities;
 
-use Ci4Common\Libraries\DbtransLib;
 use Ci4Orm\Interfaces\IEntity;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\BaseConnection;
 use DateTime;
-use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Date;
 
 class EntityManager
 {

@@ -2,8 +2,6 @@
 
 namespace Ci4Orm\Entities;
 
-use Ci4Common\Libraries\DbtransLib;
-use Ci4Common\Services\DbTransService;
 use Ci4Orm\Interfaces\IEntity;
 use Exception;
 
