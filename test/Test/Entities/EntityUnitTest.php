@@ -6,6 +6,7 @@ use Ci4Orm\Entities\EntityManager;
 use Ci4Orm\Entities\EntityScope;
 use Ci4Orm\Entities\EntityUnit;
 use Ci4OrmTest\Entity\Transaction;
+use Ci4OrmTest\Entity\TransactionDetail;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
@@ -56,7 +57,7 @@ class EntityUnitTest extends TestCase
         expect($return)->toBeNull();
     }
 
-    public function testFlush_perist()
+    public function testFlush_persist()
     {
 
         $transaction1 = (new Transaction())
@@ -64,18 +65,37 @@ class EntityUnitTest extends TestCase
         $transaction2 = (new Transaction())
             ->setNoOrder('NO_ORDER2');
 
+
+        $transactionDetail1_1 = (new TransactionDetail())
+            ->setTransaction($transaction1)
+            ->setItemName('Candy');
+
+        $transactionDetail2_1 = (new TransactionDetail())
+            ->setTransaction($transaction2)
+            ->setItemName('Chitos');
+
+        $transactionDetail2_2 = (new TransactionDetail())
+            ->setTransaction($transaction2)
+            ->setItemName('Chitato');
+
         $entityScope = EntityScope::getInstance();
         $entityScope->addEntity(EntityScope::PERFORM_ADD_UPDATE, $transaction1);
         $entityScope->addEntity(EntityScope::PERFORM_ADD_UPDATE, $transaction2);
+        $entityScope->addEntity(EntityScope::PERFORM_ADD_UPDATE, $transactionDetail1_1);
+        $entityScope->addEntity(EntityScope::PERFORM_ADD_UPDATE, $transactionDetail2_1);
+        $entityScope->addEntity(EntityScope::PERFORM_ADD_UPDATE, $transactionDetail2_2);
 
 
-        $this->baseBuilder->shouldReceive('set')->twice()->andReturn($this->baseBuilder);
-        $this->baseBuilder->shouldReceive('insert')->twice()->andReturn($this->baseResult);
-        $this->baseConnection->shouldReceive('insertID')->twice()->andReturn(1, 2);
+        $this->baseBuilder->shouldReceive('set')->times(5)->andReturn($this->baseBuilder);
+        $this->baseBuilder->shouldReceive('insert')->times(5)->andReturn($this->baseResult);
+        $this->baseConnection->shouldReceive('insertID')->times(5)->andReturn(1, 2, 1, 2, 3);
 
         $return = $this->entityUnit->flush();
         expect($transaction1->getId())->toEqual(1);
         expect($transaction2->getId())->toEqual(2);
+        expect($transactionDetail1_1->getId())->toEqual(1);
+        expect($transactionDetail2_1->getId())->toEqual(2);
+        expect($transactionDetail2_2->getId())->toEqual(3);
         expect($return)->toBeNull();
     }
 

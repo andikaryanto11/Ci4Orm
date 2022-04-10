@@ -5,7 +5,7 @@ namespace Ci4OrmTest\Entity;
 use Ci4Orm\Entities\Entity;
 use Ci4Orm\Entities\EntityList;
 
-class TransactionDetailDetail extends Entity
+class TransactionDetail extends Entity
 {
      /**
      * @var int
@@ -61,7 +61,7 @@ class TransactionDetailDetail extends Entity
      */
     public function getItemName(): ?string
     {
-        return $this->NoOrder;
+        return $this->ItemName;
     }
 
     /**
